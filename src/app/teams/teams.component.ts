@@ -46,6 +46,7 @@ export class TeamsComponent implements OnInit, OnChanges {
 
   ngOnInit() { this.initializeBoard(); }
 
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['teams'] && !changes['teams'].firstChange) {
       const newTeams: Player[][] = changes['teams'].currentValue;
@@ -62,6 +63,7 @@ export class TeamsComponent implements OnInit, OnChanges {
 
     this.teams.forEach((team, teamIndex) => {
       this.boardState[teamIndex] = {};
+      // Seed every slot as empty
       this.pitchRows.forEach(row =>
         row.slots.forEach(slot => {
           this.boardState[teamIndex][`team${teamIndex}-${slot.id}`] = [];
@@ -72,10 +74,11 @@ export class TeamsComponent implements OnInit, OnChanges {
         const p = player as any;
 
         if (p._slotId) {
+          // _slotId was saved as e.g. "team0-mid-1" — use as-is
           const saved = p._slotId as string;
           if (this.boardState[teamIndex][saved] !== undefined) {
             this.boardState[teamIndex][saved].push(player);
-            return; 
+            return; // placed — skip role-based fallback
           }
         }
 

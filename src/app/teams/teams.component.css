@@ -14,7 +14,6 @@
   direction: rtl;
 }
 
-/* Read-only board: side-by-side small pitches */
 .read-only-board {
   gap: 12px;
   overflow-x: auto;
@@ -42,7 +41,6 @@
   margin-bottom: 12px;
 }
 
-/*  Full-size pitch (edit mode)  */
 .pitch {
   position: relative;
   background-color: #2e7d32;
@@ -56,7 +54,6 @@
   flex-direction: column;
 }
 
-/* Compact pitch (read-only / locked preview) */
 .pitch.pitch-sm {
   width: 200px;
   height: 340px;
@@ -136,7 +133,6 @@
   width: 100%;
 }
 
-/*  Interactive slot  */
 .tactical-slot {
   width: 60px;
   height: 80px;
@@ -146,7 +142,6 @@
   align-items: center;
 }
 
-/*  Read-only slot (smaller)  */
 .tactical-slot-ro {
   width: 36px;
   height: 48px;
@@ -176,7 +171,6 @@
   transform: scale(1.1);
 }
 
-/*  Player wrapper (interactive)  */
 .player-wrapper {
   width: 100%;
   height: 100%;
@@ -189,7 +183,6 @@
 }
 .player-wrapper:active { cursor: grabbing; }
 
-/*  Player wrapper (read-only)  */
 .player-wrapper-ro {
   display: flex;
   flex-direction: column;
@@ -198,7 +191,7 @@
   z-index: 10;
 }
 
-/*  Shirt  */
+
 .shirt {
   position: relative;
   width: 32px; height: 36px;
@@ -225,7 +218,6 @@
 .shirt::before { left:  -7px; transform: rotate(-25deg); }
 .shirt::after  { right: -7px; transform: rotate( 25deg); }
 
-/* Compact shirt in read-only mode */
 .shirt.shirt-sm {
   width: 20px; height: 22px;
   font-size: 7px;
@@ -252,13 +244,11 @@
   width: 7px; height: 5px;
 }
 
-/* Team colours */
 .team-0 { background-color: #1d4ed8; }
 .team-1 { background-color: #dc2626; }
 .team-2 { background-color: #eab308; color: #000; }
 .team-3 { background-color: #9333ea; }
 
-/*  Player info badge  */
 .player-info {
   background: rgba(255,255,255,0.95);
   padding: 2px;
@@ -309,7 +299,6 @@
   background: #fff;
 }
 
-/*  CDK drag */
 .cdk-drag-preview {
   opacity: 0.95;
   transform: scale(1.1);
@@ -317,7 +306,6 @@
 }
 .cdk-drag-placeholder { opacity: 0; }
 
-/*  Buttons  */
 .btn-row {
   display: flex;
   gap: 12px;
@@ -344,3 +332,44 @@
 
 .btn-dark { background: #1e293b; color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 .btn-dark:hover { background: #0f172a; transform: translateY(-1px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
+
+@media (max-width: 700px) {
+  .teams-management {
+    padding: 0 8px;
+    margin-top: 16px;
+  }
+
+  .tactical-board,
+  .read-only-board {
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    gap: 24px;
+  }
+
+  .pitch-container {
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .pitch {
+    width: 100% !important;
+    max-width: 330px;
+  }
+
+  .pitch.pitch-sm {
+    width: 100% !important;
+    max-width: 280px;
+    height: 380px;
+  }
+
+  .pitch-header {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+  }
+
+  .actions-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}

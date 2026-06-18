@@ -1,16 +1,10 @@
-@if (isRsvpRoute) {
-  <router-outlet></router-outlet>
-} @else {
-
-  <!--Radio nav inputs-->
-  <input type="radio" name="nav" id="r-dashboard"     class="nav-radio" checked>
+<input type="radio" name="nav" id="r-dashboard"     class="nav-radio" checked>
   <input type="radio" name="nav" id="r-players"       class="nav-radio">
   <input type="radio" name="nav" id="r-history"       class="nav-radio">
   <input type="radio" name="nav" id="r-active-match"  class="nav-radio">
 
   <div class="app">
 
-    <!--SIDEBAR-->
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-crest">
@@ -58,7 +52,6 @@
           <span class="nav-label">היסטוריית משחקים</span>
         </label>
 
-        <!-- Active match nav item - shown only when match is locked -->
         @if (activeMatch?.status === 'locked') {
           <label class="nav-item nav-item-live" for="r-active-match">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -74,25 +67,48 @@
         }
       </nav>
 
-      <div class="sidebar-foot">Tactical Arena · v1.0</div>
+      <div class="sidebar-foot">
+        @if (authService.isLoggedIn) {
+          <div class="sidebar-user">
+            @if (authService.userPhotoURL) {
+              <img [src]="authService.userPhotoURL" class="sidebar-avatar" alt="תמונת פרופיל" referrerpolicy="no-referrer">
+            }
+            <div class="sidebar-user-info">
+              <span class="sidebar-username">{{ authService.userDisplayName }}</span>
+              <span class="sidebar-role-badge sidebar-role-{{ authService.appUser()?.role }}">
+                {{ authService.userRole }}
+              </span>
+            </div>
+          </div>
+          <button class="sidebar-logout-btn" (click)="authService.logout()" title="התנתק">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            התנתק
+          </button>
+        }
+        <span class="sidebar-version">Tactical Arena · v1.0</span>
+      </div>
     </aside>
 
-    <!-- MAIN WORKSPACE -->
     <main class="workspace">
 
-      <!-- DASHBOARD -->
       <section class="view view-dashboard">
         <div class="page">
           <div class="page-head">
             <div class="eyebrow">סקירה כללית</div>
             <h1 class="display">לוח בקרה</h1>
+            <p>מבט מהיר על הקבוצה, הסטטיסטיקות והמשחק הבא</p>
           </div>
 
           <div class="stats">
             <div class="stat">
               <div class="num display">{{ (totalMatches$ | async) || 0 }}</div>
               <div class="lbl">משחקים שהתקיימו</div>
-              <div class="sub">בכל הזמנים</div>
+              <div class="sub">העונה</div>
             </div>
             <div class="stat">
               <div class="num display">{{ (avgGoalsPerMatch$ | async) || 0 }}</div>
@@ -110,11 +126,14 @@
             <div class="card">
               <div class="card-head">
 
-                <!--No active match-->
                 @if (!activeMatch) {
-                  <button class="btn btn-primary btn-block" (click)="isDatePickerVisible = true">
-                    צור משחק חדש
-                  </button>
+                  @if (authService.isOrganizer) {
+                    <button class="btn btn-primary btn-block" (click)="isDatePickerVisible = true">
+                      צור משחק חדש
+                    </button>
+                  } @else {
+                    <div class="viewer-notice">אין משחק פעיל כרגע</div>
+                  }
 
                   @if (isDatePickerVisible) {
                     <div class="modal-overlay">
@@ -134,7 +153,6 @@
                   }
                 }
 
-                <!--Registration phase-->
                 @if (activeMatch?.status === 'registration') {
                   <div style="display:flex; justify-content:space-between; align-items:center;
                                width:100%; background:#f8fafc; padding:16px; border-radius:8px;
@@ -153,18 +171,16 @@
                   </div>
                 }
 
-                <!--Draft phase banner-->
                 @if (activeMatch?.status === 'draft') {
                   <div class="locked-banner draft-banner">
                     <div>
                       <h3 class="locked-banner-date">{{ formattedMatchDate }}</h3>
-                      <span class="locked-banner-sub">טיוטת הרכבים - עדיין ניתן לערוך</span>
+                      <span class="locked-banner-sub">טיוטת הרכבים — עדיין ניתן לערוך</span>
                     </div>
-                    <span class="status-badge-draft">טיוטה</span>
+                    <span class="status-badge-draft">✏️ טיוטה</span>
                   </div>
                 }
 
-                <!--Locked phase banner-->
                 @if (activeMatch?.status === 'locked') {
                   <div class="locked-banner">
                     <div>
@@ -176,7 +192,7 @@
                         <span class="live-dot"></span> משחק פעיל
                       </span>
                       <label for="r-active-match" class="btn btn-dark" style="cursor:pointer; font-size:0.82rem; padding:6px 12px;">
-                        צפה בפרטי המשחק
+                        צפה במשחק
                       </label>
                     </div>
                   </div>
@@ -184,7 +200,6 @@
 
               </div>
 
-              <!--Registration body-->
               @if (isMatchCreationActive) {
                 <div class="card-body">
                   <div class="form-group" style="margin-top:5px;">
@@ -205,7 +220,13 @@
                       </div>
                       <ul>
                         @for (player of (acceptedPlayers$ | async) || []; track player.id) {
-                          <li><span>{{ player.name }}</span><span class="tag">{{ player.rating }}</span></li>
+                          <li class="rsvp-player-row">
+                            <span class="rsvp-name">{{ player.name }}</span>
+                            @if (getRsvpRole(player.id)) {
+                              <span class="rsvp-role-tag">{{ getRsvpRole(player.id) }}</span>
+                            }
+                            <span class="tag">{{ player.rating }}</span>
+                          </li>
                         }
                       </ul>
                     </div>
@@ -224,7 +245,9 @@
                   </div>
 
                   <div class="row-actions">
-                    <button class="btn btn-dark" (click)="openTeamsCountModal()">צור קבוצות</button>
+                    @if (authService.isOrganizer) {
+                      <button class="btn btn-dark" (click)="openTeamsCountModal()">חלק לקבוצות</button>
+                    }
                   </div>
                 </div>
               }
@@ -237,7 +260,7 @@
                       <circle cx="12" cy="12" r="10"></circle>
                       <path d="M12 8v4m0 4h.01"></path>
                     </svg>
-                    ההרכבים בטיוטה - ניתן לגרור שחקנים בין עמדות. לחץ "נעל סופית" כשמוכן.
+                    ההרכבים בטיוטה — ניתן לגרור שחקנים בין עמדות. לחץ "נעל סופית" כשמוכן.
                   </div>
                   <app-teams
                     [teams]="generatedTeams"
@@ -248,11 +271,10 @@
                 </div>
               }
 
-              <!-- LOCKED: read-only compact preview -->
               @if (activeMatch?.status === 'locked' && generatedTeams.length > 0) {
                 <div class="card-body">
                   <p style="font-size:13px; color:var(--text-muted); margin:0 0 12px;">
-                    ההרכבים נעולים - לניהול המשחק לחץ על "משחק פעיל" בתפריט
+                    ההרכבים נעולים — לניהול המשחק לחץ על "משחק פעיל" בתפריט
                   </p>
                   <app-teams
                     [teams]="generatedTeams"
@@ -308,7 +330,6 @@
         </div>
       </section>
 
-      <!-- PLAYERS -->
       <section class="view view-players">
         <div class="page">
           <div class="page-head">
@@ -341,7 +362,9 @@
                   <input class="input" type="number" min="60" max="99"
                          [(ngModel)]="newPlayerRating">
                 </div>
-                <button class="btn btn-accent" (click)="addPlayer()">הוסף לסגל</button>
+                @if (authService.isOrganizer) {
+                  <button class="btn btn-accent" (click)="addPlayer()">הוסף לסגל</button>
+                }
               </div>
             </div>
           </div>
@@ -374,12 +397,14 @@
                   <span class="k">דירוג</span>
                 </div>
                 <div class="p-controls">
-                  <button class="icon-btn icon-del" title="מחק" (click)="deletePlayer(player.id)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path>
-                    </svg>
-                  </button>
+                  @if (authService.isOrganizer) {
+                    <button class="icon-btn icon-del" title="מחק" (click)="deletePlayer(player.id)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                           stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path>
+                      </svg>
+                    </button>
+                  }
                 </div>
               </div>
             } @empty {
@@ -389,7 +414,6 @@
         </div>
       </section>
 
-      <!-- HISTORY -->
       <section class="view view-history">
         <div class="page">
           <div class="page-head">
@@ -404,6 +428,7 @@
                 <input type="checkbox" class="match-expand" [id]="'m-' + match.id">
                 <label class="match-head" [for]="'m-' + match.id">
                   <div class="match-meta">
+
                     <div class="vs-block">
                       @for (pair of getMatchups(match); track $index; let pi = $index) {
                         <div class="vs-pair">
@@ -426,7 +451,6 @@
                     }
                   </div>
 
-                  <!-- For header scoreboard: show all team goals -->
                   <div class="scoreboard-multi">
                     @for (key of getTeamKeys(match); track key; let si = $index) {
                       @if (si > 0) { <span class="sep">·</span> }
@@ -493,7 +517,6 @@
         </div>
       </section>
 
-      <!--ACTIVE MATCH VIEW-->
       <section class="view view-active-match">
         <div class="page">
           <div class="page-head" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
@@ -502,28 +525,29 @@
               <h1 class="display">משחק פעיל</h1>
               <p>{{ formattedMatchDate }}</p>
             </div>
-            <button class="btn btn-danger-outline" (click)="openFinishModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                   stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-left:6px;">
-                <path d="M9 12l2 2 4-4M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-              </svg>
-              סיום משחק
-            </button>
+            @if (authService.isOrganizer) {
+              <button class="btn btn-danger-outline" (click)="openFinishModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-left:6px;">
+                  <path d="M9 12l2 2 4-4M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                סיום משחק
+              </button>
+            }
           </div>
 
           @if (generatedTeams.length > 0) {
 
-            <!-- Pitch boards -->
             <app-teams
               [teams]="generatedTeams"
               [matchId]="activeMatch?.id || ''"
               [readOnly]="true">
             </app-teams>
 
-            <!-- Per-team collapsible roster cards -->
             <div class="per-team-rosters">
               @for (team of generatedTeams; track teamIndex; let teamIndex = $index) {
                 <div class="per-team-card team-card-{{ teamIndex % 4 }}">
+
                   <button class="per-team-header" (click)="toggleTeamRoster(teamIndex)">
                     <span class="team-color-dot dot-{{ teamIndex % 4 }}"></span>
                     <span class="per-team-title">קבוצה {{ teamIndex + 1 }}</span>
@@ -545,13 +569,15 @@
                 </div>
               }
             </div>
+
           }
+
         </div>
       </section>
+
     </main>
   </div>
 
-  <!--  TEAMS COUNT MODAL (before draft) -->
   @if (isTeamsCountModalOpen) {
     <div class="modal-overlay" (click)="isTeamsCountModalOpen = false">
       <div class="modal-content" (click)="$event.stopPropagation()" style="max-width:380px;">
@@ -578,7 +604,6 @@
     </div>
   }
 
-  <!-- FINISH MATCH MODAL - single scroll, responsive -->
   @if (isFinishModalOpen) {
     <div class="modal-overlay" (click)="closeFinishModal()">
       <div class="modal-content modal-finish" (click)="$event.stopPropagation()">
@@ -588,11 +613,11 @@
           <button class="modal-close-btn" (click)="closeFinishModal()">✕</button>
         </div>
 
-        <!--Team sections -->
         <div class="finish-scroll-body">
 
           @for (team of generatedTeams; track teamIdx; let teamIdx = $index) {
             <div class="finish-team-section finish-section-{{ teamIdx % 4 }}">
+
               <button class="finish-team-toggle" type="button"
                       (click)="toggleFinishTeam(teamIdx)">
                 <span class="finish-team-dot dot-{{ teamIdx % 4 }}"></span>
@@ -619,16 +644,13 @@
                   @for (player of team; track player.id) {
                     <div class="finish-player-row">
 
-                      <!-- MVP star -->
                       <button class="mvp-star-btn" type="button"
                               [class.mvp-star-active]="selectedMvpId === player.id"
                               (click)="selectedMvpId = (selectedMvpId === player.id ? '' : player.id)"
                               title="בחר כשחקן מצטיין">★</button>
 
-                      <!-- Name -->
                       <span class="fp-name">{{ player.name }}</span>
 
-                      <!-- Goal stepper -->
                       <div class="fp-goals">
                         <button class="stepper-btn" type="button"
                                 (click)="playerGoalInputs[player.id] = Math.max(0, (playerGoalInputs[player.id]||0) - 1)">−</button>
@@ -644,34 +666,35 @@
                                class="pg-input rating-input"
                                [(ngModel)]="playerRatingInputs[player.id]">
                       </div>
+
                     </div>
                   }
                 </div>
               }
+
             </div>
           }
-        </div><!-- /finish-scroll-body -->
 
-        <!-- MVP banner -->
+        </div>
+
         @if (selectedMvpId) {
           <div class="mvp-selected-banner">
             🏆 שחקן מצטיין: <strong>{{ getMvpPlayerName(selectedMvpId) }}</strong>
             <button class="mvp-clear-btn" (click)="selectedMvpId = ''">✕</button>
           </div>
         }
-        <!-- Legend -->
+
         <div class="finish-legend">
           <span>★ מצטיין</span>
           <span>⚽ שערים</span>
           <span>דירוג ישן › דירוג חדש</span>
         </div>
-        <!-- Actions -->
+
         <div class="modal-actions" style="margin-top:12px;">
           <button class="btn btn-ghost" (click)="closeFinishModal()">ביטול</button>
-          <button class="btn btn-accent" (click)="submitFinishMatch()">אשר וסיים </button>
+          <button class="btn btn-accent" (click)="submitFinishMatch()">אשר וסיים ✓</button>
         </div>
+
       </div>
     </div>
   }
-
-}

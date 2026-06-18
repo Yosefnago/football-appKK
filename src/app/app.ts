@@ -1,14 +1,15 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Observable, combineLatest, firstValueFrom } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { map } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 import { PlayerService, Player, PlayerRole, PlayerEndMatchUpdate } from './services/player.service';
 import { MatchService, Match, TeamResult, PlayerMatchStat } from './services/match.service';
 import { TeamGeneratorService } from './services/TeamGeneratorService';
 import { TeamsComponent } from './teams/teams.component';
+import { AuthService } from './services/Auth.service';
 
 export interface FinishPlayerRow {
   id: string;
@@ -20,15 +21,22 @@ export interface FinishPlayerRow {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterOutlet, TeamsComponent],
+  imports: [FormsModule, CommonModule, TeamsComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit {
   readonly Math = Math;
 
+  readonly authService = inject(AuthService);
+
+  private playerService        = inject(PlayerService);
+  private matchService         = inject(MatchService);
+  private teamGeneratorService = inject(TeamGeneratorService);
+  private cdr                  = inject(ChangeDetectorRef);
+  private router               = inject(Router);
+
   activeMatch: Match | null = null;
-  isRsvpRoute = false;
 
   newPlayerName   = '';
   newPlayerRating = 0;
@@ -40,15 +48,12 @@ export class App implements OnInit {
   generatedMatchLink    = '';
   generatedTeams: Player[][] = [];
 
-  // Teams count modal 
   isTeamsCountModalOpen   = false;
   teamsCountInput         = 2;
   pendingAcceptedPlayers: Player[] = [];
 
-  // Active match 
   teamRosterOpen: boolean[] = [];
 
-  // Finish modal 
   isFinishModalOpen   = false;
   playerGoalInputs:   Record<string, number> = {};
   playerRatingInputs: Record<string, number> = {};
@@ -56,7 +61,6 @@ export class App implements OnInit {
   finishPlayerRows: FinishPlayerRow[] = [];
   finishTeamOpen: boolean[] = [];
 
-  // Observables 
   players$!:          Observable<Player[]>;
   matches$!:          Observable<Match[]>;
   completedMatches$!: Observable<Match[]>;
@@ -69,20 +73,7 @@ export class App implements OnInit {
   topRatedPlayers$!:  Observable<Player[]>;
   topScorers$!:       Observable<Player[]>;
 
-  constructor(
-    private playerService:        PlayerService,
-    private matchService:         MatchService,
-    private teamGeneratorService: TeamGeneratorService,
-    private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {
-    this.router.events.pipe(
-      filter(e => e instanceof NavigationEnd)
-    ).subscribe((e: any) => {
-      this.isRsvpRoute = e.urlAfterRedirects.includes('/rsvp/');
-      this.cdr.detectChanges();
-    });
-  }
+  constructor() {}
 
   async ngOnInit(): Promise<void> {
     this.players$          = this.playerService.getPlayers();
@@ -102,14 +93,13 @@ export class App implements OnInit {
       } else if ((m.status === 'draft' || m.status === 'locked') && m.teams) {
         this.isMatchCreationActive = false;
         const keys = Object.keys(m.teams).sort();
-        this.generatedTeams  = keys.map(k => m.teams![k]);
-        this.teamRosterOpen  = this.generatedTeams.map(() => false);
+        this.generatedTeams = keys.map(k => m.teams![k]);
+        this.teamRosterOpen = this.generatedTeams.map(() => false);
       }
       this.cdr.detectChanges();
     }
   }
 
-  // Stats 
   private initDashboardStats(): void {
     this.topRatedPlayers$ = this.players$.pipe(
       map(ps => [...ps].sort((a, b) => b.rating - a.rating).slice(0, 3))
@@ -138,7 +128,6 @@ export class App implements OnInit {
     );
   }
 
-  //  Match creation 
   async confirmMatchCreation(): Promise<void> {
     if (this.activeMatch) { alert('כבר קיים משחק פעיל!'); return; }
     if (!this.selectedMatchDate) { alert('יש לבחור תאריך ושעה.'); return; }
@@ -193,18 +182,15 @@ export class App implements OnInit {
     });
   }
 
-  //  Active match toggles 
   toggleTeamRoster(index: number): void {
     this.teamRosterOpen[index] = !this.teamRosterOpen[index];
   }
 
-  //  Finish modal 
   openFinishModal(): void {
     this.playerGoalInputs   = {};
     this.playerRatingInputs = {};
     this.selectedMvpId      = '';
     this.finishPlayerRows   = [];
-    // All teams expanded by default
     this.finishTeamOpen     = this.generatedTeams.map(() => true);
 
     this.generatedTeams.forEach((team, teamIndex) => {
@@ -274,7 +260,6 @@ export class App implements OnInit {
     }
   }
 
-  // History helpers 
   formatMatchDate(iso: string): string {
     if (!iso) return '';
     const d = new Date(iso);
@@ -312,7 +297,12 @@ export class App implements OnInit {
     return '';
   }
 
-  // ── Players 
+  getRsvpRole(playerId: string): string {
+    const role = this.activeMatch?.rsvps?.[playerId]?.preferredRole;
+    const map: Record<string, string> = { GK: 'שוער', DEF: 'הגנה', MID: 'קישור', FWD: 'התקפה' };
+    return role ? (map[role] ?? role) : '';
+  }
+
   async addPlayer(): Promise<void> {
     const name = this.newPlayerName.trim();
     if (!name || !this.newPlayerRole) return;

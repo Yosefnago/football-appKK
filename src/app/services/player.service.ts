@@ -51,6 +51,7 @@ export class PlayerService {
     const playerRef = doc(db, 'players', id);
     await deleteDoc(playerRef);
   }
+
   async bulkUpdateAfterMatch(
     updates: Record<string, PlayerEndMatchUpdate>
   ): Promise<void> {
