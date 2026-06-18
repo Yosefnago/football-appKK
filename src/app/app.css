@@ -1373,3 +1373,6 @@
   border-radius: 8px;
   text-align: center;
 }
+
+.icon-edit { background: #dbeafe; color: #1d4ed8; }
+.icon-edit:hover { background: #1d4ed8; color: #fff; }

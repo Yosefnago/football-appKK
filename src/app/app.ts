@@ -19,7 +19,7 @@ export interface FinishPlayerRow {
 }
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-dashboard',
   standalone: true,
   imports: [FormsModule, CommonModule, TeamsComponent],
   templateUrl: './app.html',
@@ -318,6 +318,21 @@ export class App implements OnInit {
 
   async deletePlayer(id: string): Promise<void> {
     await this.playerService.deletePlayer(id);
+  }
+
+  editingPlayer: Player | null = null;
+  editingName = '';
+
+  startEditName(player: Player): void {
+    this.editingPlayer = player;
+    this.editingName   = player.name;
+  }
+
+  async saveEditName(): Promise<void> {
+    if (!this.editingPlayer || !this.editingName.trim()) return;
+    await this.playerService.updateName(this.editingPlayer.id, this.editingName.trim());
+    this.editingPlayer = null;
+    this.cdr.detectChanges();
   }
 
   getPlayerInitial(name: string): string { return name?.charAt(0) ?? ''; }

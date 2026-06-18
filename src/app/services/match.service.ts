@@ -12,6 +12,7 @@ export type MatchStatus = 'registration' | 'draft' | 'locked' | 'completed';
 export interface RsvpState {
   status: 'accepted' | 'declined';
   preferredRole?: string;
+  uid?: string;
 }
 
 export interface TeamResult {
@@ -60,33 +61,20 @@ export class MatchService {
   }
 
   async createMatch(date: string): Promise<string> {
-    const newMatch = { date, status: 'registration', rsvps: {} };
-    const docRef = await addDoc(this.matchesCollection, newMatch);
+    const docRef = await addDoc(this.matchesCollection, { date, status: 'registration', rsvps: {} });
     return docRef.id;
   }
 
-  async updateRsvp(
-    matchId: string,
-    playerId: string,
-    status: 'accepted' | 'declined',
-    role?: string
-  ): Promise<void> {
-    const matchRef = doc(db, 'matches', matchId);
-    await updateDoc(matchRef, {
-      [`rsvps.${playerId}`]: { status, preferredRole: role || null }
+  async updateRsvp(matchId: string, playerId: string, status: 'accepted' | 'declined', role?: string, uid?: string): Promise<void> {
+    await updateDoc(doc(db, 'matches', matchId), {
+      [`rsvps.${playerId}`]: { status, preferredRole: role || null, uid: uid || null }
     });
   }
 
   async getActiveMatch(): Promise<Match | null> {
-    const q = query(
-      this.matchesCollection,
-      where('status', 'in', ['registration', 'draft', 'locked']),
-      limit(1)
-    );
+    const q = query(this.matchesCollection, where('status', 'in', ['registration', 'draft', 'locked']), limit(1));
     const snapshot = await getDocs(q);
-    return snapshot.empty
-      ? null
-      : ({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Match);
+    return snapshot.empty ? null : ({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Match);
   }
 
   getActiveMatchObservable(matchId: string): Observable<Match> {
@@ -98,43 +86,26 @@ export class MatchService {
   }
 
   async saveTeamsDraft(matchId: string, teams: Player[][]): Promise<void> {
-    const matchRef = doc(db, 'matches', matchId);
     const serializedTeams: Record<string, any> = {};
     teams.forEach((team, index) => {
       serializedTeams[`group${index + 1}`] = team.map(p => ({ ...p }));
     });
-    await updateDoc(matchRef, { status: 'draft', teams: serializedTeams });
-  }
-
-  async updateDraftTeams(matchId: string, teams: Player[][]): Promise<void> {
-    const matchRef = doc(db, 'matches', matchId);
-    const serializedTeams: Record<string, any> = {};
-    teams.forEach((team, index) => {
-      serializedTeams[`group${index + 1}`] = team.map(p => ({ ...p }));
-    });
-    await updateDoc(matchRef, { teams: serializedTeams });
+    await updateDoc(doc(db, 'matches', matchId), { status: 'draft', teams: serializedTeams });
   }
 
   async finalLockTeams(matchId: string, teams: Player[][]): Promise<void> {
-    const matchRef = doc(db, 'matches', matchId);
     const serializedTeams: Record<string, any> = {};
     teams.forEach((team, index) => {
       serializedTeams[`group${index + 1}`] = team.map(p => ({ ...p }));
     });
-    await updateDoc(matchRef, { status: 'locked', teams: serializedTeams });
+    await updateDoc(doc(db, 'matches', matchId), { status: 'locked', teams: serializedTeams });
   }
 
   async lockMatchAndSaveTeams(matchId: string, teams: Player[][]): Promise<void> {
     return this.finalLockTeams(matchId, teams);
   }
 
-  async completeMatch(
-    matchId: string,
-    teamResults: Record<string, TeamResult>,
-    playerStats: Record<string, PlayerMatchStat>,
-    mvpId: string
-  ): Promise<void> {
-    const matchRef = doc(db, 'matches', matchId);
-    await updateDoc(matchRef, { status: 'completed', teamResults, playerStats, mvpId });
+  async completeMatch(matchId: string, teamResults: Record<string, TeamResult>, playerStats: Record<string, PlayerMatchStat>, mvpId: string): Promise<void> {
+    await updateDoc(doc(db, 'matches', matchId), { status: 'completed', teamResults, playerStats, mvpId });
   }
 }

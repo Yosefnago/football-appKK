@@ -1,52 +1,154 @@
 <div class="rsvp-wrapper">
   <div class="rsvp-card">
-    <h2 class="display">אישור הגעה למשחק</h2>
-    
-    @if (!submitted) {
-      <div class="btn-group">
-        <button class="btn btn-primary" (click)="setAttendance(true)">מגיע</button>
-        <button class="btn btn-danger" (click)="setAttendance(false)">לא מגיע</button>
+
+    <div class="rsvp-brand">
+      <div class="rsvp-crest">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 7.5l3.2 2.3-1.2 3.7H9.9l-1.2-3.7L12 7.5z"></path>
+          <path d="M12 7.5V4M15.2 9.8l3-1M13.9 13.5l1.9 3M10.1 13.5l-1.9 3M8.8 9.8l-3-1"></path>
+        </svg>
       </div>
-
-      @if (isAttending !== null) {
-        <div class="form-section">
-          <div class="field">
-            <label>בחר שחקן מתוך הסגל:</label>
-            <select class="select" [(ngModel)]="selectedPlayerId" (change)="onPlayerSelect()">
-              <option value="" disabled selected>בחר שחקן...</option>
-              @for (p of players$ | async; track p.id) {
-                <option [value]="p.id">
-                  {{ p.name }} 
-                  @if (currentMatch?.rsvps?.[p.id]) { (כבר הגיב) }
-                </option>
-              }
-            </select>
-          </div>
-
-          @if (isAttending) {
-            <div class="field">
-              <label>תפקיד מועדף למשחק זה:</label>
-              <select class="select" [(ngModel)]="selectedRole">
-                <option value="" disabled selected>בחר תפקיד...</option>
-                <option value="GK">שוער</option>
-                <option value="DEF">הגנה</option>
-                <option value="MID">קישור</option>
-                <option value="FWD">התקפה</option>
-              </select>
-            </div>
-          }
-
-          <button class="btn btn-accent btn-block mt-15" (click)="submitRsvp()">שלח</button>
+      <h1 class="rsvp-title">מנהל קבוצה</h1>
+      @if (currentMatch?.date) {
+        <div class="rsvp-match-info">
+          <span class="rsvp-match-label">מועד המשחק</span>
+          <span class="rsvp-match-date">{{ formatDate(currentMatch!.date) }}</span>
         </div>
+      }
+    </div>
+
+    @if (step === 'loading') {
+      <div class="rsvp-loading">
+        <span class="rsvp-spinner"></span>
+        <span>טוען...</span>
+      </div>
+    }
+
+    @if (step === 'login') {
+      <p class="rsvp-desc">התחבר כדי לאשר הגעה למשחק</p>
+      <button class="google-btn" (click)="loginWithGoogle()" [disabled]="loading">
+        @if (!loading) {
+          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          <span>התחבר עם Google</span>
+        } @else {
+          <span class="rsvp-spinner rsvp-spinner-sm"></span>
+          <span>מתחבר...</span>
+        }
+      </button>
+      @if (loginError) {
+        <p class="rsvp-error">{{ loginError }}</p>
       }
     }
 
-    @if (submitted) {
-      <div class="success-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin-bottom:15px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="M22 4L12 14.01l-3-3"></path></svg>
-        <h3>התשובה נקלטה במערכת!</h3>
-        <p>אפשר לסגור את החלון.</p>
+    @if (step === 'register') {
+      @if (alreadyExists) {
+        <div class="rsvp-already">
+          <div class="already-icon">⚠️</div>
+          <h3>חשבון כבר קיים</h3>
+          <p>
+            החשבון הזה כבר רשום במערכת אבל הנתונים לא נמצאו.
+            <br>פנה למארגן לעזרה.
+          </p>
+        </div>
+      } @else {
+        <p class="rsvp-desc">הרשמה ראשונה — מלא את הפרטים שלך</p>
+        <div class="rsvp-field">
+          <label>שם מלא</label>
+          <input class="rsvp-input" type="text" placeholder="למשל: יוסי כהן" [(ngModel)]="newName">
+        </div>
+        <div class="rsvp-field">
+          <label>תפקיד מועדף</label>
+          <div class="role-grid">
+            @for (r of roles; track r.value) {
+              <button class="role-btn" [class.selected]="newRole === r.value" (click)="newRole = $any(r.value)">
+                <span class="role-icon">{{ r.icon }}</span>
+                <span>{{ r.label }}</span>
+              </button>
+            }
+          </div>
+        </div>
+        <button class="rsvp-submit-btn" (click)="registerAndContinue()"
+                [disabled]="!newName.trim() || !newRole || loading">
+          @if (loading) { <span class="rsvp-spinner rsvp-spinner-sm"></span> }
+          המשך
+        </button>
+      }
+    }
+
+    @if (step === 'rsvp') {
+      <p class="rsvp-greeting">שלום, <strong>{{ currentPlayer?.name }}</strong></p>
+
+      <div class="rsvp-section-label">האם אתה מגיע?</div>
+      <div class="attendance-btns">
+        <button class="att-btn att-yes" [class.selected]="attendance === true"
+                (click)="selectAttendance(true)">
+          ✓ מגיע
+        </button>
+        <button class="att-btn att-no" [class.selected]="attendance === false"
+                (click)="selectAttendance(false)">
+          ✕ לא מגיע
+        </button>
+      </div>
+
+      @if (attendance === true) {
+        <div class="rsvp-field" style="margin-top:20px;">
+          <label>תפקיד מועדף למשחק זה</label>
+          <div class="role-grid">
+            @for (r of roles; track r.value) {
+              <button class="role-btn" [class.selected]="selectedRole === r.value"
+                      (click)="selectedRole = $any(r.value)">
+                <span class="role-icon">{{ r.icon }}</span>
+                <span>{{ r.label }}</span>
+              </button>
+            }
+          </div>
+        </div>
+        <button class="rsvp-submit-btn" (click)="goToConfirm()" style="margin-top:16px;">
+          המשך לאישור
+        </button>
+      }
+    }
+
+    @if (step === 'confirm') {
+      <div class="confirm-summary">
+        <div class="confirm-row">
+          <span class="confirm-label">שם</span>
+          <span class="confirm-value">{{ currentPlayer?.name }}</span>
+        </div>
+        <div class="confirm-row">
+          <span class="confirm-label">הגעה</span>
+          <span class="confirm-value" [class.confirm-yes]="attendance" [class.confirm-no]="!attendance">
+            {{ attendance ? '✓ מגיע' : '✕ לא מגיע' }}
+          </span>
+        </div>
+        @if (attendance && selectedRole) {
+          <div class="confirm-row">
+            <span class="confirm-label">תפקיד</span>
+            <span class="confirm-value">{{ roleLabel(selectedRole) }}</span>
+          </div>
+        }
+      </div>
+      <div class="confirm-actions">
+        <button class="btn-back" (click)="step = 'rsvp'">חזרה</button>
+        <button class="rsvp-submit-btn" (click)="submitRsvp()">שלח אישור</button>
       </div>
     }
+
+    @if (step === 'done') {
+      <div class="rsvp-done">
+        <div class="done-icon" [class.done-no]="attendance === false">
+          {{ attendance === false ? '✕' : '✓' }}
+        </div>
+        <h3>{{ attendance === false ? 'נרשמת כלא מגיע' : 'האישור נקלט!' }}</h3>
+        <p>תודה, ניתן לסגור את החלון.</p>
+      </div>
+    }
+
   </div>
 </div>
