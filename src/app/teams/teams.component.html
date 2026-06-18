@@ -1,0 +1,97 @@
+<div class="teams-management">
+  <div class="teams-content-wrapper">
+
+    <!-- Action bar -->
+    <div class="actions-header">
+      @if (!readOnly) {
+        <h2 style="margin:0;">עריכת הרכבים</h2>
+      } @else {
+        <h2 style="margin:0;">לוח טקטי</h2>
+      }
+      <div class="btn-row">
+        <!-- Share is always available -->
+        <button class="btn btn-ghost" (click)="exportPitchImage()">שתף תמונה</button>
+        <!-- Lock button only in edit mode -->
+        @if (!readOnly) {
+          <button class="btn btn-dark" (click)="saveConfiguration()">נעל הרכבים סופית</button>
+        }
+      </div>
+    </div>
+
+    <div id="tactical-pitch-canvas" class="tactical-board" [class.read-only-board]="readOnly" cdkDropListGroup>
+      @for (team of teams; track teamIndex; let teamIndex = $index) {
+        <div class="pitch-container">
+          <div class="pitch-header">קבוצה {{ teamIndex + 1 }}</div>
+          <div class="pitch" [class.pitch-sm]="readOnly">
+
+            <div class="penalty-area top"></div>
+            <div class="center-circle"></div>
+            <div class="halfway-line"></div>
+            <div class="penalty-area bottom"></div>
+
+            <div class="slots-grid">
+              @for (row of pitchRows; track row.name) {
+                <div class="pitch-row">
+                  @for (slot of row.slots; track slot.id) {
+
+                    @if (!readOnly) {
+                      <!-- Interactive slot -->
+                      <div class="tactical-slot"
+                           cdkDropList
+                           id="team{{teamIndex}}-{{slot.id}}"
+                           [cdkDropListData]="boardState[teamIndex]['team' + teamIndex + '-' + slot.id]"
+                           (cdkDropListDropped)="drop($event)">
+                        <div class="slot-marker"></div>
+                        @if (boardState[teamIndex]['team' + teamIndex + '-' + slot.id].length > 0) {
+                          <div class="player-wrapper" cdkDrag>
+                            <div class="shirt team-{{ teamIndex % 4 }}">
+                              <div class="shirt-collar"></div>
+                              <span class="p-role-text">{{ boardState[teamIndex]['team' + teamIndex + '-' + slot.id][0].role }}</span>
+                            </div>
+                            <div class="player-info">
+                              <span class="p-name">{{ boardState[teamIndex]['team' + teamIndex + '-' + slot.id][0].name }}</span>
+                              <div class="p-meta">
+                                <span class="p-rating">★{{ boardState[teamIndex]['team' + teamIndex + '-' + slot.id][0].rating }}</span>
+                                <select
+                                  [ngModel]="boardState[teamIndex]['team' + teamIndex + '-' + slot.id][0].role"
+                                  (ngModelChange)="changePlayerRole(boardState[teamIndex]['team' + teamIndex + '-' + slot.id][0], $event)"
+                                  class="tiny-select"
+                                  (mousedown)="$event.stopPropagation()">
+                                  @for (role of roles; track role) {
+                                    <option [value]="role">{{ role }}</option>
+                                  }
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <!-- Read-only slot -->
+                      <div class="tactical-slot tactical-slot-ro">
+                        <div class="slot-marker"></div>
+                        @if (boardState[teamIndex]['team' + teamIndex + '-' + slot.id].length > 0) {
+                          <div class="player-wrapper-ro">
+                            <div class="shirt shirt-sm team-{{ teamIndex % 4 }}">
+                              <div class="shirt-collar"></div>
+                              <span class="p-role-text">{{ boardState[teamIndex]['team' + teamIndex + '-' + slot.id][0].role }}</span>
+                            </div>
+                            <div class="player-info player-info-sm">
+                              <span class="p-name">{{ boardState[teamIndex]['team' + teamIndex + '-' + slot.id][0].name }}</span>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

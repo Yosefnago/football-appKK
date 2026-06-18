@@ -1,431 +1,677 @@
-<input type="radio" name="nav" id="r-dashboard" class="nav-radio" checked>
-<input type="radio" name="nav" id="r-players" class="nav-radio">
-<input type="radio" name="nav" id="r-history" class="nav-radio">
+@if (isRsvpRoute) {
+  <router-outlet></router-outlet>
+} @else {
 
-<div class="app">
+  <!--Radio nav inputs-->
+  <input type="radio" name="nav" id="r-dashboard"     class="nav-radio" checked>
+  <input type="radio" name="nav" id="r-players"       class="nav-radio">
+  <input type="radio" name="nav" id="r-history"       class="nav-radio">
+  <input type="radio" name="nav" id="r-active-match"  class="nav-radio">
 
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-crest">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9"></circle>
-          <path d="M12 7.5l3.2 2.3-1.2 3.7H9.9l-1.2-3.7L12 7.5z"></path>
-          <path d="M12 7.5V4M15.2 9.8l3-1M13.9 13.5l1.9 3M10.1 13.5l-1.9 3M8.8 9.8l-3-1"></path>
-        </svg>
-      </div>
-      <div class="brand-text">
-        <span class="brand-name">מנהל קבוצה</span>
-        <span class="brand-tag">Tactical Arena</span>
-      </div>
-    </div>
+  <div class="app">
 
-    <nav class="nav">
-      <label class="nav-item" for="r-dashboard">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="9" rx="1.5"></rect>
-          <rect x="14" y="3" width="7" height="5" rx="1.5"></rect>
-          <rect x="14" y="12" width="7" height="9" rx="1.5"></rect>
-          <rect x="3" y="16" width="7" height="5" rx="1.5"></rect>
-        </svg>
-        <span class="nav-label">לוח בקרה</span>
-      </label>
-
-      <label class="nav-item" for="r-players">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9" cy="8" r="3.2"></circle>
-          <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"></path>
-          <path d="M16 5.5a3 3 0 0 1 0 5.8M17.5 14c2.4.5 4 2.4 4 5"></path>
-        </svg>
-        <span class="nav-label">מאגר שחקנים</span>
-      </label>
-
-      <label class="nav-item" for="r-history">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="4" y="3" width="16" height="18" rx="2"></rect>
-          <path d="M8 8h8M8 12h8M8 16h5"></path>
-        </svg>
-        <span class="nav-label">היסטוריית משחקים</span>
-      </label>
-    </nav>
-
-    <div class="sidebar-foot">Tactical Arena · v1.0</div>
-  </aside>
-
-  <main class="workspace">
-
-    <section class="view view-dashboard">
-      <div class="page">
-        <div class="page-head">
-          <div class="eyebrow">סקירה כללית</div>
-          <h1 class="display">לוח בקרה</h1>
-          <p>מבט מהיר על הקבוצה, הסטטיסטיקות והמשחק הבא</p>
+    <!--SIDEBAR-->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-crest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 7.5l3.2 2.3-1.2 3.7H9.9l-1.2-3.7L12 7.5z"></path>
+            <path d="M12 7.5V4M15.2 9.8l3-1M13.9 13.5l1.9 3M10.1 13.5l-1.9 3M8.8 9.8l-3-1"></path>
+          </svg>
         </div>
-
-        <div class="stats">
-          <div class="stat">
-            <div class="num display">12</div>
-            <div class="lbl">משחקים שהתקיימו</div>
-            <div class="sub">העונה</div>
-          </div>
-          <div class="stat">
-            <div class="num display">3.2</div>
-            <div class="lbl">שערים בממוצע למשחק</div>
-            <div class="sub">38 שערים בסה״כ</div>
-          </div>
-          <div class="stat">
-            <div class="num display">{{ (players$ | async)?.length || 0 }}</div>
-            <div class="lbl">שחקנים רשומים</div>
-            <div class="sub">בסגל</div>
-          </div>
+        <div class="brand-text">
+          <span class="brand-name">מנהל קבוצה</span>
+          <span class="brand-tag">Tactical Arena</span>
         </div>
+      </div>
 
-        <div class="dash-grid">
+      <nav class="nav">
+        <label class="nav-item" for="r-dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="9" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="5" rx="1.5"></rect>
+            <rect x="14" y="12" width="7" height="9" rx="1.5"></rect>
+            <rect x="3" y="16" width="7" height="5" rx="1.5"></rect>
+          </svg>
+          <span class="nav-label">לוח בקרה</span>
+        </label>
 
-          <div class="card">
-            <div class="card-head">
-              <button class="btn btn-primary btn-block" (click)="isDatePickerVisible = true" [disabled]="isMatchCreationActive">
-                צור משחק חדש
-              </button>
+        <label class="nav-item" for="r-players">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8" r="3.2"></circle>
+            <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"></path>
+            <path d="M16 5.5a3 3 0 0 1 0 5.8M17.5 14c2.4.5 4 2.4 4 5"></path>
+          </svg>
+          <span class="nav-label">מאגר שחקנים</span>
+        </label>
 
-              @if (isDatePickerVisible) {
-                <div class="modal-overlay">
-                  <div class="modal-content">
-                    <h3 style="margin-top: 0; margin-bottom: 1.5rem;">הגדרת מועד משחק</h3>
-                    
-                    <div class="form-group">
-                      <label>תאריך ושעת התחלה</label>
-                      <input 
-                        type="datetime-local" 
-                        class="datetime-input" 
-                        [(ngModel)]="selectedMatchDate"
-                      />
+        <label class="nav-item" for="r-history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="3" width="16" height="18" rx="2"></rect>
+            <path d="M8 8h8M8 12h8M8 16h5"></path>
+          </svg>
+          <span class="nav-label">היסטוריית משחקים</span>
+        </label>
+
+        <!-- Active match nav item - shown only when match is locked -->
+        @if (activeMatch?.status === 'locked') {
+          <label class="nav-item nav-item-live" for="r-active-match">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 7.5l3.2 2.3-1.2 3.7H9.9l-1.2-3.7L12 7.5z"></path>
+            </svg>
+            <span class="nav-label">
+              משחק פעיל
+              <span class="live-dot"></span>
+            </span>
+          </label>
+        }
+      </nav>
+
+      <div class="sidebar-foot">Tactical Arena · v1.0</div>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="workspace">
+
+      <!-- DASHBOARD -->
+      <section class="view view-dashboard">
+        <div class="page">
+          <div class="page-head">
+            <div class="eyebrow">סקירה כללית</div>
+            <h1 class="display">לוח בקרה</h1>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <div class="num display">{{ (totalMatches$ | async) || 0 }}</div>
+              <div class="lbl">משחקים שהתקיימו</div>
+              <div class="sub">בכל הזמנים</div>
+            </div>
+            <div class="stat">
+              <div class="num display">{{ (avgGoalsPerMatch$ | async) || 0 }}</div>
+              <div class="lbl">שערים בממוצע למשחק</div>
+              <div class="sub">{{ (totalTeamGoals$ | async) || 0 }} שערים בסה״כ</div>
+            </div>
+            <div class="stat">
+              <div class="num display">{{ (players$ | async)?.length || 0 }}</div>
+              <div class="lbl">שחקנים רשומים</div>
+              <div class="sub">בסגל</div>
+            </div>
+          </div>
+
+          <div class="dash-grid">
+            <div class="card">
+              <div class="card-head">
+
+                <!--No active match-->
+                @if (!activeMatch) {
+                  <button class="btn btn-primary btn-block" (click)="isDatePickerVisible = true">
+                    צור משחק חדש
+                  </button>
+
+                  @if (isDatePickerVisible) {
+                    <div class="modal-overlay">
+                      <div class="modal-content">
+                        <h3 style="margin-top:0; margin-bottom:1.5rem;">הגדרת מועד משחק</h3>
+                        <div class="form-group">
+                          <label>תאריך ושעת התחלה</label>
+                          <input type="datetime-local" class="datetime-input"
+                                 [(ngModel)]="selectedMatchDate" />
+                        </div>
+                        <div class="modal-actions">
+                          <button class="btn btn-danger" (click)="isDatePickerVisible = false">ביטול</button>
+                          <button class="btn btn-primary" (click)="confirmMatchCreation()">אשר והקם משחק</button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                }
+
+                <!--Registration phase-->
+                @if (activeMatch?.status === 'registration') {
+                  <div style="display:flex; justify-content:space-between; align-items:center;
+                               width:100%; background:#f8fafc; padding:16px; border-radius:8px;
+                               border:1px solid #e2e8f0;">
+                    <div>
+                      <h3 style="margin:0; color:#0f172a; font-size:1.15rem; font-weight:800;">
+                        {{ formattedMatchDate }}
+                      </h3>
+                      <span style="font-size:0.85rem; color:#64748b;">פרטי משחק פעיל</span>
+                    </div>
+                    <span style="background:var(--primary); color:rgb(29,27,27); padding:6px 14px;
+                                 border-radius:20px; font-size:0.85rem; font-weight:bold;
+                                 box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                      שלב הרשמה
+                    </span>
+                  </div>
+                }
+
+                <!--Draft phase banner-->
+                @if (activeMatch?.status === 'draft') {
+                  <div class="locked-banner draft-banner">
+                    <div>
+                      <h3 class="locked-banner-date">{{ formattedMatchDate }}</h3>
+                      <span class="locked-banner-sub">טיוטת הרכבים - עדיין ניתן לערוך</span>
+                    </div>
+                    <span class="status-badge-draft">טיוטה</span>
+                  </div>
+                }
+
+                <!--Locked phase banner-->
+                @if (activeMatch?.status === 'locked') {
+                  <div class="locked-banner">
+                    <div>
+                      <h3 class="locked-banner-date">{{ formattedMatchDate }}</h3>
+                      <span class="locked-banner-sub">פרטי משחק פעיל</span>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                      <span class="status-badge-live">
+                        <span class="live-dot"></span> משחק פעיל
+                      </span>
+                      <label for="r-active-match" class="btn btn-dark" style="cursor:pointer; font-size:0.82rem; padding:6px 12px;">
+                        צפה בפרטי המשחק
+                      </label>
+                    </div>
+                  </div>
+                }
+
+              </div>
+
+              <!--Registration body-->
+              @if (isMatchCreationActive) {
+                <div class="card-body">
+                  <div class="form-group" style="margin-top:5px;">
+                    <label>לינק לשליחה לשחקנים:</label>
+                    <div style="display:flex; gap:5px;">
+                      <input type="text" readonly [value]="generatedMatchLink" class="input" #linkInput>
+                      <button class="btn btn-ghost" (click)="copyLink(linkInput)">העתק</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="teams-preview">
+                  <div class="teams-grid">
+                    <div class="team">
+                      <div class="team-top" style="border-color:var(--accepted-blue);">
+                        <b>אישרו הגעה</b>
+                        <span class="numOfAcc">{{ (acceptedPlayers$ | async)?.length || 0 }}</span>
+                      </div>
+                      <ul>
+                        @for (player of (acceptedPlayers$ | async) || []; track player.id) {
+                          <li><span>{{ player.name }}</span><span class="tag">{{ player.rating }}</span></li>
+                        }
+                      </ul>
                     </div>
 
-                    <div class="modal-actions">
-                      <button class="btn btn-danger" (click)="isDatePickerVisible = false">ביטול</button>
-                      <button class="btn btn-primary" (click)="isDatePickerVisible = false; isMatchCreationActive = true">אשר והקם משחק</button>
+                    <div class="team">
+                      <div class="team-top" style="border-color:var(--not-accepted-green);">
+                        <b>לא אישרו הגעה</b>
+                        <span class="numOfAcc">{{ (declinedPlayers$ | async)?.length || 0 }}</span>
+                      </div>
+                      <ul>
+                        @for (player of (declinedPlayers$ | async) || []; track player.id) {
+                          <li><span>{{ player.name }}</span><span class="tag">{{ player.rating }}</span></li>
+                        }
+                      </ul>
                     </div>
+                  </div>
+
+                  <div class="row-actions">
+                    <button class="btn btn-dark" (click)="openTeamsCountModal()">צור קבוצות</button>
                   </div>
                 </div>
               }
+
+              @if (activeMatch?.status === 'draft' && generatedTeams.length > 0) {
+                <div class="card-body draft-body">
+                  <div class="draft-notice">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M12 8v4m0 4h.01"></path>
+                    </svg>
+                    ההרכבים בטיוטה - ניתן לגרור שחקנים בין עמדות. לחץ "נעל סופית" כשמוכן.
+                  </div>
+                  <app-teams
+                    [teams]="generatedTeams"
+                    [matchId]="activeMatch?.id || ''"
+                    [readOnly]="false"
+                    (locked)="onTeamsLocked($event)">
+                  </app-teams>
+                </div>
+              }
+
+              <!-- LOCKED: read-only compact preview -->
+              @if (activeMatch?.status === 'locked' && generatedTeams.length > 0) {
+                <div class="card-body">
+                  <p style="font-size:13px; color:var(--text-muted); margin:0 0 12px;">
+                    ההרכבים נעולים - לניהול המשחק לחץ על "משחק פעיל" בתפריט
+                  </p>
+                  <app-teams
+                    [teams]="generatedTeams"
+                    [matchId]="activeMatch?.id || ''"
+                    [readOnly]="true">
+                  </app-teams>
+                </div>
+              }
+
             </div>
 
-            @if (isMatchCreationActive) {
-              <div class="card-body">
-                <div class="date-status-row">
-                  <span class="date-text">{{ formattedMatchDate }}</span>
-                  <span class="status-badge">בתהליך...</span>
+            <div class="side-stack">
+              <div class="card">
+                <div class="card-head">
+                  <h2>שחקני העילית</h2><span class="hint">טופ 3</span>
+                </div>
+                <div class="card-body">
+                  <div class="board">
+                    @for (player of (topRatedPlayers$ | async) || []; track player.id) {
+                      <div class="board-row">
+                        <span class="rank r{{ $index + 1 }} display">{{ $index + 1 }}</span>
+                        <span class="nm">{{ player.name }}</span>
+                        <span class="rating-chip">{{ player.rating }}</span>
+                      </div>
+                    } @empty {
+                      <div class="board-row"><span class="nm">אין שחקנים עדיין</span></div>
+                    }
+                  </div>
                 </div>
               </div>
 
-              <div class="teams-preview">
-                <div class="teams-grid">
-                  <div class="team">
-                    <div class="team-top" style="border-color: var(--accepted-blue); background: rgba(58,90,152,0.08);">
-                      <span class="dot" style="background: var(--accepted-blue);"></span>
-                      <b>אישרו הגעה</b>
-                      <span class="numOfAcc">7</span>
-                    </div>
-                    <ul>
-                      <li><span>דוד כהן</span><span class="tag">1800</span></li>
-                      <li><span>אלי לוי</span><span class="tag">1600</span></li>
-                      <li><span>מוטי ברק</span><span class="tag">1500</span></li>
-                    </ul>
+              <div class="card">
+                <div class="card-head">
+                  <h2>מלך שערים</h2><span class="hint">טופ 3</span>
+                </div>
+                <div class="card-body">
+                  <div class="board">
+                    @for (player of (topScorers$ | async) || []; track player.id) {
+                      <div class="board-row">
+                        <span class="rank r{{ $index + 1 }} display">{{ $index + 1 }}</span>
+                        <span class="nm">{{ player.name }}</span>
+                        <span class="rating-chip">{{ player.totalGoals || 0 }}</span>
+                      </div>
+                    } @empty {
+                      <div class="board-row"><span class="nm">אין שחקנים עדיין</span></div>
+                    }
                   </div>
-                  <div class="team">
-                    <div class="team-top" style="border-color: var(--not-accepted-green); background: rgba(235,54,30,0.08);">
-                      <span class="dot" style="background: var(--not-accepted-green);"></span>
-                      <b>לא אישרו הגעה</b>
-                      <span class="numOfAcc">7</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- PLAYERS -->
+      <section class="view view-players">
+        <div class="page">
+          <div class="page-head">
+            <div class="eyebrow">סגל</div>
+            <h1 class="display">מאגר שחקנים</h1>
+            <p>הוספה, עריכת דירוג וניהול הסגל</p>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>הוספת שחקן חדש</h2></div>
+            <div class="card-body">
+              <div class="add-row">
+                <div class="field">
+                  <label>שם מלא</label>
+                  <input class="input" type="text" placeholder="הזן שם שחקן"
+                         [(ngModel)]="newPlayerName" (keydown.enter)="addPlayer()">
+                </div>
+                <div class="field small">
+                  <label>תפקיד עיקרי</label>
+                  <select class="select" [(ngModel)]="newPlayerRole">
+                    <option value="" disabled selected>בחר...</option>
+                    <option value="GK">שוער</option>
+                    <option value="DEF">הגנה</option>
+                    <option value="MID">קישור</option>
+                    <option value="FWD">התקפה</option>
+                  </select>
+                </div>
+                <div class="field small">
+                  <label>דירוג התחלתי</label>
+                  <input class="input" type="number" min="60" max="99"
+                         [(ngModel)]="newPlayerRating">
+                </div>
+                <button class="btn btn-accent" (click)="addPlayer()">הוסף לסגל</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-bar">
+            <h2 class="display">הסגל הנוכחי</h2>
+            <span class="count-pill">{{ (players$ | async)?.length || 0 }} שחקנים</span>
+          </div>
+
+          <div class="players-grid">
+            @for (player of (players$ | async) ?? []; track player.id) {
+              <div class="player-card" [class.inactive]="!player.isActive">
+                <div class="roundel" [class.roundel-mvp]="player.mvpAwards > 0">
+                  {{ getPlayerInitial(player.name) }}
+                  <span class="status-dot" [class.active]="player.isActive"
+                        [title]="player.isActive ? 'Active' : 'Inactive'"></span>
+                  @if (player.mvpAwards > 0) {
+                    <span class="mvp-crown" title="{{ player.mvpAwards }} פרסי MVP">🏆</span>
+                  }
+                </div>
+                <div class="p-name">{{ player.name }}</div>
+                <div class="p-role">{{ player.role || 'Player' }}</div>
+                <div class="p-stats">
+                  <span>⚽ {{ player.totalGoals }}</span>
+                  <span>🎮 {{ player.gamesPlayed }}</span>
+                  <span>🏆 {{ player.mvpAwards }}</span>
+                </div>
+                <div class="p-rating">
+                  <span class="v">{{ player.rating }}</span>
+                  <span class="k">דירוג</span>
+                </div>
+                <div class="p-controls">
+                  <button class="icon-btn icon-del" title="מחק" (click)="deletePlayer(player.id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            } @empty {
+              <div class="empty">אין שחקנים עדיין. הוסף את הראשון לסגל.</div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORY -->
+      <section class="view view-history">
+        <div class="page">
+          <div class="page-head">
+            <div class="eyebrow">ארכיון</div>
+            <h1 class="display">היסטוריית משחקים</h1>
+            <p>לחצו על משחק כדי לפתוח את ההרכבים המלאים</p>
+          </div>
+
+          <div class="matches">
+            @for (match of (completedMatches$ | async) ?? []; track match.id; let mIdx = $index) {
+              <div class="match">
+                <input type="checkbox" class="match-expand" [id]="'m-' + match.id">
+                <label class="match-head" [for]="'m-' + match.id">
+                  <div class="match-meta">
+                    <div class="vs-block">
+                      @for (pair of getMatchups(match); track $index; let pi = $index) {
+                        <div class="vs-pair">
+                          <span class="pip" [style.background]="['#1d4ed8','#dc2626','#eab308','#9333ea'][teamKeyIndex(pair[0]) % 4]"></span>
+                          קבוצה {{ teamKeyIndex(pair[0]) + 1 }}
+                          <span class="vs-sep">נגד</span>
+                          קבוצה {{ teamKeyIndex(pair[1]) + 1 }}
+                          <span class="pip" [style.background]="['#1d4ed8','#dc2626','#eab308','#9333ea'][teamKeyIndex(pair[1]) % 4]"></span>
+                          <span class="pair-score">
+                            {{ match.teamResults?.[pair[0]]?.goals ?? '?' }}
+                            <span style="color:var(--text-muted)">:</span>
+                            {{ match.teamResults?.[pair[1]]?.goals ?? '?' }}
+                          </span>
+                        </div>
+                      }
                     </div>
-                    <ul>
-                      <li><span>ירון שלום</span><span class="tag">1750</span></li>
-                      <li><span>שמואל גינזבורג</span><span class="tag">1550</span></li>
-                      <li><span>גיל אדרי</span><span class="tag">1550</span></li>
-                    </ul>
+                    <div class="date">{{ formatMatchDate(match.date) }}</div>
+                    @if (match.mvpId) {
+                      <div class="mvp-badge">🏆 {{ getMvpName(match, (players$ | async)) }}</div>
+                    }
+                  </div>
+
+                  <!-- For header scoreboard: show all team goals -->
+                  <div class="scoreboard-multi">
+                    @for (key of getTeamKeys(match); track key; let si = $index) {
+                      @if (si > 0) { <span class="sep">·</span> }
+                      <span class="score-team-label">{{ teamKeyIndex(key) + 1 }}</span>
+                      <span class="score-team-goals">{{ match.teamResults?.[key]?.goals ?? '?' }}</span>
+                    }
+                  </div>
+
+                  <div class="chev">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
+                  </div>
+                </label>
+
+                <div class="match-body">
+                  <div class="history-teams-list">
+                    @for (key of getTeamKeys(match); track key; let ti = $index) {
+
+                      <details class="history-team-details team-card-{{ teamKeyIndex(key) % 4 }}">
+
+                        <summary class="history-team-summary">
+                          <span class="dot" [style.background]="['#1d4ed8','#dc2626','#eab308','#9333ea'][teamKeyIndex(key) % 4]"></span>
+                          <b>קבוצה {{ teamKeyIndex(key) + 1 }}</b>
+                          <span class="history-player-count">
+                            {{ (match.teams?.[key] ?? []).length }} שחקנים
+                          </span>
+                          <span class="goals-chip">⚽ {{ match.teamResults?.[key]?.goals ?? 0 }}</span>
+                          <span class="summary-chevron">›</span>
+                        </summary>
+
+                        <div class="roster-list">
+                          @for (player of (match.teams?.[key] ?? []); track player.id) {
+                            <div class="pl" [class.pl-mvp]="match.mvpId === player.id">
+                              <b>
+                                @if (match.mvpId === player.id) {
+                                  <span style="margin-left:4px;">🏆</span>
+                                }
+                                {{ player.name }}
+                              </b>
+                              <div style="display:flex; gap:6px; align-items:center;">
+                                @if ((match.playerStats?.[player.id]?.goals ?? 0) > 0) {
+                                  <span class="goal-chip">⚽ {{ match.playerStats?.[player.id]?.goals }}</span>
+                                }
+                                <span class="r">{{ player.rating }}</span>
+                              </div>
+                            </div>
+                          }
+                        </div>
+
+                      </details>
+
+                    }
                   </div>
                 </div>
 
-                <div class="row-actions">
-                  <button class="btn btn-dark">נעל וצור קבוצות</button>
-                  <button class="btn btn-ghost" (click)="isMatchCreationActive = false; selectedMatchDate = ''">ביטול</button>
-                </div>
               </div>
+            } @empty {
+              <div class="empty">אין משחקים בארכיון עדיין.</div>
             }
           </div>
 
-          <div class="side-stack">
+        </div>
+      </section>
 
-            <div class="card">
-              <div class="card-head">
-                <h2>שחקני העילית</h2>
-                <span class="hint">טופ 3</span>
-              </div>
-              <div class="card-body">
-                <div class="board">
-                  <div class="board-row">
-                    <span class="rank r1 display">1</span>
-                    <span class="nm">דוד כהן</span>
-                    <span class="rating-chip">1850</span>
-                  </div>
-                  <div class="board-row">
-                    <span class="rank r2 display">2</span>
-                    <span class="nm">ירון שלום</span>
-                    <span class="rating-chip">1780</span>
-                  </div>
-                  <div class="board-row">
-                    <span class="rank r3 display">3</span>
-                    <span class="nm">ניר ברנט</span>
-                    <span class="rating-chip">1720</span>
-                  </div>
-                </div>
-              </div>
+      <!--ACTIVE MATCH VIEW-->
+      <section class="view view-active-match">
+        <div class="page">
+          <div class="page-head" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div class="eyebrow">בשידור חי</div>
+              <h1 class="display">משחק פעיל</h1>
+              <p>{{ formattedMatchDate }}</p>
             </div>
-
-            <div class="card">
-              <div class="card-head">
-                <h2>מלך שערים</h2>
-                <span class="hint">טופ 3</span>
-              </div>
-              <div class="card-body">
-                <div class="board">
-                  <div class="board-row">
-                    <span class="rank r1 display">1</span>
-                    <span class="nm">דוד כהן</span>
-                    <span class="rating-chip">1850</span>
-                  </div>
-                  <div class="board-row">
-                    <span class="rank r2 display">2</span>
-                    <span class="nm">ירון שלום</span>
-                    <span class="rating-chip">1780</span>
-                  </div>
-                  <div class="board-row">
-                    <span class="rank r3 display">3</span>
-                    <span class="nm">ניר ברנט</span>
-                    <span class="rating-chip">1720</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+            <button class="btn btn-danger-outline" (click)="openFinishModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-left:6px;">
+                <path d="M9 12l2 2 4-4M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+              סיום משחק
+            </button>
           </div>
 
-        </div>
-      </div>
-    </section>
+          @if (generatedTeams.length > 0) {
 
-    <section class="view view-players">
-      <div class="page">
-        <div class="page-head">
-          <div class="eyebrow">סגל</div>
-          <h1 class="display">מאגר שחקנים</h1>
-          <p>הוספה, עריכת דירוג וניהול הסגל</p>
-        </div>
+            <!-- Pitch boards -->
+            <app-teams
+              [teams]="generatedTeams"
+              [matchId]="activeMatch?.id || ''"
+              [readOnly]="true">
+            </app-teams>
 
-        <div class="card">
-          <div class="card-head"><h2>הוספת שחקן חדש</h2></div>
-          <div class="card-body">
-            <div class="add-row">
-              <div class="field">
-                <label>שם מלא</label>
-                <input class="input" type="text" placeholder="הזן שם שחקן"
-                       [(ngModel)]="newPlayerName" (keydown.enter)="addPlayer()">
-              </div>
-              <div class="field small">
-                <label>דירוג התחלתי</label>
-                <input class="input" type="number" min="0" max="3000" [(ngModel)]="newPlayerRating">
-              </div>
-              <button class="btn btn-accent" (click)="addPlayer()">הוסף לסגל</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="section-bar">
-          <h2 class="display">הסגל הנוכחי</h2>
-          <span class="count-pill">{{ (players$ | async)?.length || 0 }} שחקנים</span>
-        </div>
-
-        <div class="players-grid">
-          @for (player of (players$ | async) ?? []; track player.id) {
-            <div class="player-card">
-              <div class="roundel">{{ getPlayerInitial(player.name) }}</div>
-              <div class="p-name">{{ player.name }}</div>
-              <div class="p-role">{{ player.role || 'שחקן' }}</div>
-              <div class="p-rating">
-                <span class="v">{{ player.rating }}</span>
-                <span class="k">דירוג</span>
-              </div>
-              <div class="p-controls">
-                <div class="p-edit">
-                  <input type="number" [value]="player.rating" #ratingInput aria-label="עדכון דירוג">
-                  <button class="icon-btn icon-save" title="שמור"
-                          (click)="updateRating(player.id, ratingInput.value)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>
+            <!-- Per-team collapsible roster cards -->
+            <div class="per-team-rosters">
+              @for (team of generatedTeams; track teamIndex; let teamIndex = $index) {
+                <div class="per-team-card team-card-{{ teamIndex % 4 }}">
+                  <button class="per-team-header" (click)="toggleTeamRoster(teamIndex)">
+                    <span class="team-color-dot dot-{{ teamIndex % 4 }}"></span>
+                    <span class="per-team-title">קבוצה {{ teamIndex + 1 }}</span>
+                    <span class="per-team-count">{{ team.length }} שחקנים</span>
+                    <span class="per-team-chevron" [class.open]="teamRosterOpen[teamIndex]">›</span>
                   </button>
+
+                  @if (teamRosterOpen[teamIndex]) {
+                    <ul class="active-roster-list roster-slide-in">
+                      @for (player of team; track player.id) {
+                        <li class="active-roster-row">
+                          <span class="ar-name">{{ player.name }}</span>
+                          <span class="ar-role tag">{{ player.role }}</span>
+                          <span class="ar-rating">{{ player.rating }}</span>
+                        </li>
+                      }
+                    </ul>
+                  }
                 </div>
-                <button class="icon-btn icon-del" title="מחק" (click)="deletePlayer(player.id)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path></svg>
-                </button>
-              </div>
+              }
             </div>
-          } @empty {
-            <div class="empty">אין שחקנים עדיין. הוסף את הראשון לסגל.</div>
           }
         </div>
-      </div>
-    </section>
+      </section>
+    </main>
+  </div>
 
-    <section class="view view-history">
-      <div class="page">
-        <div class="page-head">
-          <div class="eyebrow">ארכיון</div>
-          <h1 class="display">היסטוריית משחקים</h1>
-          <p>לחצו על משחק כדי לפתוח את ההרכבים המלאים</p>
+  <!--  TEAMS COUNT MODAL (before draft) -->
+  @if (isTeamsCountModalOpen) {
+    <div class="modal-overlay" (click)="isTeamsCountModalOpen = false">
+      <div class="modal-content" (click)="$event.stopPropagation()" style="max-width:380px;">
+        <h3 style="margin-top:0; margin-bottom:6px;">חלוקה לקבוצות</h3>
+        <p style="margin:0 0 1.5rem; font-size:0.9rem; color:#64748b;">
+          {{ pendingAcceptedPlayers.length }} שחקנים אישרו הגעה. לכמה קבוצות לחלק?
+        </p>
+
+        <div class="teams-count-grid">
+          @for (n of [2, 3, 4]; track n) {
+            <button class="teams-count-btn"
+                    [class.selected]="teamsCountInput === n"
+                    (click)="teamsCountInput = n">
+              {{ n }} קבוצות
+            </button>
+          }
         </div>
 
-        <div class="matches">
-
-          <div class="match">
-            <input type="checkbox" class="match-expand" id="m1" checked>
-            <label class="match-head" for="m1">
-              <div class="match-meta">
-                <div class="vs">
-                  <span class="pip" style="background: var(--team-blue);"></span>קבוצה כחולה
-                  <span style="color: var(--text-muted); font-weight: 500;">מול</span>
-                  קבוצה ירוקה<span class="pip" style="background: var(--team-green);"></span>
-                </div>
-                <div class="date">14 בדצמבר 2024 · 18:30</div>
-              </div>
-              <div class="scoreboard">3<span class="sep">:</span>2</div>
-              <div class="chev">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
-              </div>
-            </label>
-            <div class="match-body">
-              <div class="rosters">
-                <div>
-                  <div class="roster-head" style="border-color: var(--team-blue);">
-                    <span class="dot" style="background: var(--team-blue);"></span>
-                    <b>קבוצה כחולה</b><span class="goals">3 שערים</span>
-                  </div>
-                  <div class="roster-list">
-                    <div class="pl"><b>דוד כהן</b><span class="r">1800</span></div>
-                    <div class="pl"><b>אלי לוי</b><span class="r">1600</span></div>
-                    <div class="pl"><b>מוטי ברק</b><span class="r">1500</span></div>
-                    <div class="pl"><b>ניר ברנט</b><span class="r">1720</span></div>
-                    <div class="pl"><b>רן כספי</b><span class="r">1580</span></div>
-                  </div>
-                </div>
-                <div>
-                  <div class="roster-head" style="border-color: var(--team-green);">
-                    <span class="dot" style="background: var(--team-green);"></span>
-                    <b>קבוצה ירוקה</b><span class="goals">2 שערים</span>
-                  </div>
-                  <div class="roster-list">
-                    <div class="pl"><b>ירון שלום</b><span class="r">1750</span></div>
-                    <div class="pl"><b>שמואל גינזבורג</b><span class="r">1550</span></div>
-                    <div class="pl"><b>גיל אדרי</b><span class="r">1550</span></div>
-                    <div class="pl"><b>אור מזרחי</b><span class="r">1620</span></div>
-                    <div class="pl"><b>שי ישראלי</b><span class="r">1480</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="match">
-            <input type="checkbox" class="match-expand" id="m2">
-            <label class="match-head" for="m2">
-              <div class="match-meta">
-                <div class="vs">
-                  <span class="pip" style="background: var(--team-blue);"></span>קבוצה כחולה
-                  <span style="color: var(--text-muted); font-weight: 500;">מול</span>
-                  קבוצה ירוקה<span class="pip" style="background: var(--team-green);"></span>
-                </div>
-                <div class="date">13 בדצמבר 2024 · 19:00</div>
-              </div>
-              <div class="scoreboard">4<span class="sep">:</span>1</div>
-              <div class="chev">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
-              </div>
-            </label>
-            <div class="match-body">
-              <div class="rosters">
-                <div>
-                  <div class="roster-head" style="border-color: var(--team-blue);">
-                    <span class="dot" style="background: var(--team-blue);"></span>
-                    <b>קבוצה כחולה</b><span class="goals">4 שערים</span>
-                  </div>
-                  <div class="roster-list">
-                    <div class="pl"><b>דוד כהן</b><span class="r">1800</span></div>
-                    <div class="pl"><b>ירון שלום</b><span class="r">1750</span></div>
-                    <div class="pl"><b>ניר ברנט</b><span class="r">1720</span></div>
-                    <div class="pl"><b>אלי לוי</b><span class="r">1600</span></div>
-                  </div>
-                </div>
-                <div>
-                  <div class="roster-head" style="border-color: var(--team-green);">
-                    <span class="dot" style="background: var(--team-green);"></span>
-                    <b>קבוצה ירוקה</b><span class="goals">שער אחד</span>
-                  </div>
-                  <div class="roster-list">
-                    <div class="pl"><b>שמואל גינזבורג</b><span class="r">1550</span></div>
-                    <div class="pl"><b>גיל אדרי</b><span class="r">1550</span></div>
-                    <div class="pl"><b>אור מזרחי</b><span class="r">1620</span></div>
-                    <div class="pl"><b>שי ישראלי</b><span class="r">1480</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="match">
-            <input type="checkbox" class="match-expand" id="m3">
-            <label class="match-head" for="m3">
-              <div class="match-meta">
-                <div class="vs">
-                  <span class="pip" style="background: var(--team-blue);"></span>קבוצה כחולה
-                  <span style="color: var(--text-muted); font-weight: 500;">מול</span>
-                  קבוצה ירוקה<span class="pip" style="background: var(--team-green);"></span>
-                </div>
-                <div class="date">12 בדצמבר 2024 · 18:15</div>
-              </div>
-              <div class="scoreboard">2<span class="sep">:</span>2</div>
-              <div class="chev">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
-              </div>
-            </label>
-            <div class="match-body">
-              <div class="rosters">
-                <div>
-                  <div class="roster-head" style="border-color: var(--team-blue);">
-                    <span class="dot" style="background: var(--team-blue);"></span>
-                    <b>קבוצה כחולה</b><span class="goals">2 שערים</span>
-                  </div>
-                  <div class="roster-list">
-                    <div class="pl"><b>מוטי ברק</b><span class="r">1500</span></div>
-                    <div class="pl"><b>רן כספי</b><span class="r">1580</span></div>
-                    <div class="pl"><b>אורי קסטן</b><span class="r">1420</span></div>
-                  </div>
-                </div>
-                <div>
-                  <div class="roster-head" style="border-color: var(--team-green);">
-                    <span class="dot" style="background: var(--team-green);"></span>
-                    <b>קבוצה ירוקה</b><span class="goals">2 שערים</span>
-                  </div>
-                  <div class="roster-list">
-                    <div class="pl"><b>דוד כהן</b><span class="r">1800</span></div>
-                    <div class="pl"><b>שמואל גינזבורג</b><span class="r">1550</span></div>
-                    <div class="pl"><b>אור מזרחי</b><span class="r">1620</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+        <div class="modal-actions" style="margin-top:1.5rem;">
+          <button class="btn btn-ghost" (click)="isTeamsCountModalOpen = false">ביטול</button>
+          <button class="btn btn-primary" (click)="generateDraftTeams()">צור טיוטה</button>
         </div>
       </div>
-    </section>
+    </div>
+  }
 
-  </main>
-</div>
+  <!-- FINISH MATCH MODAL - single scroll, responsive -->
+  @if (isFinishModalOpen) {
+    <div class="modal-overlay" (click)="closeFinishModal()">
+      <div class="modal-content modal-finish" (click)="$event.stopPropagation()">
+
+        <div class="finish-header">
+          <h3 class="modal-title">סיום משחק</h3>
+          <button class="modal-close-btn" (click)="closeFinishModal()">✕</button>
+        </div>
+
+        <!--Team sections -->
+        <div class="finish-scroll-body">
+
+          @for (team of generatedTeams; track teamIdx; let teamIdx = $index) {
+            <div class="finish-team-section finish-section-{{ teamIdx % 4 }}">
+              <button class="finish-team-toggle" type="button"
+                      (click)="toggleFinishTeam(teamIdx)">
+                <span class="finish-team-dot dot-{{ teamIdx % 4 }}"></span>
+                <span>קבוצה {{ teamIdx + 1 }}</span>
+                <span style="font-size:12px; color:var(--text-muted); margin-right:6px;">
+                  {{ team.length }} שחקנים
+                </span>
+                <span style="font-size:12px; color:var(--brand); font-weight:700; margin-right:4px;">
+                  ⚽ {{ getTeamGoalTotal(teamIdx) }}
+                </span>
+                <span class="finish-team-chevron" [class.open]="finishTeamOpen[teamIdx]">›</span>
+              </button>
+
+              @if (finishTeamOpen[teamIdx]) {
+                <div class="finish-team-players">
+
+                  <div class="finish-col-headers">
+                    <span class="fch-mvp">מצטיין</span>
+                    <span class="fch-name">שחקן</span>
+                    <span class="fch-goals">שערים</span>
+                    <span class="fch-rating">דירוג חדש</span>
+                  </div>
+
+                  @for (player of team; track player.id) {
+                    <div class="finish-player-row">
+
+                      <!-- MVP star -->
+                      <button class="mvp-star-btn" type="button"
+                              [class.mvp-star-active]="selectedMvpId === player.id"
+                              (click)="selectedMvpId = (selectedMvpId === player.id ? '' : player.id)"
+                              title="בחר כשחקן מצטיין">★</button>
+
+                      <!-- Name -->
+                      <span class="fp-name">{{ player.name }}</span>
+
+                      <!-- Goal stepper -->
+                      <div class="fp-goals">
+                        <button class="stepper-btn" type="button"
+                                (click)="playerGoalInputs[player.id] = Math.max(0, (playerGoalInputs[player.id]||0) - 1)">−</button>
+                        <span class="stepper-val">{{ playerGoalInputs[player.id] || 0 }}</span>
+                        <button class="stepper-btn" type="button"
+                                (click)="playerGoalInputs[player.id] = (playerGoalInputs[player.id]||0) + 1">+</button>
+                      </div>
+
+                      <div class="fp-rating">
+                        <span class="rating-current-badge">{{ player.rating }}</span>
+                        <span class="rating-arrow">›</span>
+                        <input type="number" min="40" max="99"
+                               class="pg-input rating-input"
+                               [(ngModel)]="playerRatingInputs[player.id]">
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div><!-- /finish-scroll-body -->
+
+        <!-- MVP banner -->
+        @if (selectedMvpId) {
+          <div class="mvp-selected-banner">
+            🏆 שחקן מצטיין: <strong>{{ getMvpPlayerName(selectedMvpId) }}</strong>
+            <button class="mvp-clear-btn" (click)="selectedMvpId = ''">✕</button>
+          </div>
+        }
+        <!-- Legend -->
+        <div class="finish-legend">
+          <span>★ מצטיין</span>
+          <span>⚽ שערים</span>
+          <span>דירוג ישן › דירוג חדש</span>
+        </div>
+        <!-- Actions -->
+        <div class="modal-actions" style="margin-top:12px;">
+          <button class="btn btn-ghost" (click)="closeFinishModal()">ביטול</button>
+          <button class="btn btn-accent" (click)="submitFinishMatch()">אשר וסיים </button>
+        </div>
+      </div>
+    </div>
+  }
+
+}

@@ -1,0 +1,149 @@
+.rsvp-wrapper { 
+  min-height: 100vh; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  background: var(--bg, #f3f4f6); 
+  padding: 20px;
+  direction: rtl;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.rsvp-card { 
+  background: var(--surface, #ffffff); 
+  padding: 2.5rem; 
+  border-radius: 16px; 
+  width: 100%; 
+  max-width: 420px; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05), 0 4px 10px rgba(0,0,0,0.03);
+  border: 1px solid var(--line, #e5e7eb);
+}
+
+.rsvp-card .display {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main, #111827);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.btn-group { 
+  display: flex; 
+  gap: 12px; 
+  margin-bottom: 1.5rem; 
+}
+
+.btn-group .btn { 
+  flex: 1; 
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+.btn-accent {
+  background: #10b981;
+  color: #ffffff;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.btn-accent:hover {
+  background: #059669;
+}
+
+.form-section { 
+  margin-top: 1.5rem; 
+  border-top: 1px solid var(--line, #e5e7eb); 
+  padding-top: 1.5rem; 
+  animation: fadeIn 0.3s ease;
+}
+
+.field { 
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted, #4b5563);
+}
+
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid var(--line, #d1d5db);
+  border-radius: 8px;
+  background-color: var(--surface, #ffffff);
+  color: var(--text-main, #111827);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 12px center;
+  background-size: 16px;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.mt-15 { 
+  margin-top: 1.5rem; 
+}
+
+.success-state { 
+  text-align: center; 
+  padding: 2rem 0; 
+  color: var(--text-main, #111827); 
+  animation: fadeIn 0.4s ease;
+}
+
+.success-state h3 {
+  font-size: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.success-state p {
+  color: var(--text-muted, #6b7280);
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

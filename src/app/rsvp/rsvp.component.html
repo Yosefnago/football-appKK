@@ -1,0 +1,52 @@
+<div class="rsvp-wrapper">
+  <div class="rsvp-card">
+    <h2 class="display">אישור הגעה למשחק</h2>
+    
+    @if (!submitted) {
+      <div class="btn-group">
+        <button class="btn btn-primary" (click)="setAttendance(true)">מגיע</button>
+        <button class="btn btn-danger" (click)="setAttendance(false)">לא מגיע</button>
+      </div>
+
+      @if (isAttending !== null) {
+        <div class="form-section">
+          <div class="field">
+            <label>בחר שחקן מתוך הסגל:</label>
+            <select class="select" [(ngModel)]="selectedPlayerId" (change)="onPlayerSelect()">
+              <option value="" disabled selected>בחר שחקן...</option>
+              @for (p of players$ | async; track p.id) {
+                <option [value]="p.id">
+                  {{ p.name }} 
+                  @if (currentMatch?.rsvps?.[p.id]) { (כבר הגיב) }
+                </option>
+              }
+            </select>
+          </div>
+
+          @if (isAttending) {
+            <div class="field">
+              <label>תפקיד מועדף למשחק זה:</label>
+              <select class="select" [(ngModel)]="selectedRole">
+                <option value="" disabled selected>בחר תפקיד...</option>
+                <option value="GK">שוער</option>
+                <option value="DEF">הגנה</option>
+                <option value="MID">קישור</option>
+                <option value="FWD">התקפה</option>
+              </select>
+            </div>
+          }
+
+          <button class="btn btn-accent btn-block mt-15" (click)="submitRsvp()">שלח</button>
+        </div>
+      }
+    }
+
+    @if (submitted) {
+      <div class="success-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin-bottom:15px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="M22 4L12 14.01l-3-3"></path></svg>
+        <h3>התשובה נקלטה במערכת!</h3>
+        <p>אפשר לסגור את החלון.</p>
+      </div>
+    }
+  </div>
+</div>
