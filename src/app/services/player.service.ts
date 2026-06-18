@@ -1,46 +1,54 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '../app.config';
+
+export type PlayerRole = 'GK' | 'DEF' | 'MID' | 'FWD' | '';
 
 export interface Player {
   id: string;
   name: string;
   rating: number;
-  role?: string;
+  role: PlayerRole;
+  totalGoals: number;
+  gamesPlayed: number;
+  mvpAwards: number;
+  isActive: boolean;
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class PlayerService {
-  // Swap this BehaviorSubject for Firestore/HTTP later — the public API stays the same.
-  private readonly players = new BehaviorSubject<Player[]>([
-    { id: '1', name: 'דוד כהן', rating: 1850, role: 'חלוץ' },
-    { id: '2', name: 'ירון שלום', rating: 1780, role: 'מגן' },
-    { id: '3', name: 'ניר ברנט', rating: 1720, role: 'קשר' },
-    { id: '4', name: 'אלי לוי', rating: 1620, role: 'קשר' },
-    { id: '5', name: 'שמואל גינזבורג', rating: 1550, role: 'שוער' },
-    { id: '6', name: 'מוטי ברק', rating: 1500, role: 'קשר' },
-    { id: '7', name: 'גיל אדרי', rating: 1480, role: 'חלוץ' }
-  ]);
+  private playersCollection = collection(db, 'players');
 
   getPlayers(): Observable<Player[]> {
-    return this.players.asObservable();
+    return new Observable((observer) => {
+      const unsubscribe = onSnapshot(this.playersCollection, (snapshot) => {
+        const players = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Player[];
+        
+        observer.next(players);
+      }, (error) => {
+        observer.error(error);
+      });
+
+      return () => unsubscribe();
+    });
   }
 
-  async addPlayer(name: string, rating = 1500): Promise<void> {
-    const player: Player = {
-      id: crypto.randomUUID(),
-      name: name.trim(),
-      rating
-    };
-    this.players.next([...this.players.value, player]);
+  async addPlayer(playerData: Omit<Player, 'id'>): Promise<void> {
+    await addDoc(this.playersCollection, playerData);
   }
 
   async updateRating(id: string, rating: number): Promise<void> {
-    this.players.next(
-      this.players.value.map(p => (p.id === id ? { ...p, rating } : p))
-    );
+    const playerRef = doc(db, 'players', id);
+    await updateDoc(playerRef, { rating });
   }
 
   async deletePlayer(id: string): Promise<void> {
-    this.players.next(this.players.value.filter(p => p.id !== id));
+    const playerRef = doc(db, 'players', id);
+    await deleteDoc(playerRef);
   }
 }

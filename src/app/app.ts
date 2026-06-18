@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 
-import { PlayerService, Player } from './services/player.service';
+import { PlayerService, Player, PlayerRole } from './services/player.service';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +14,8 @@ import { PlayerService, Player } from './services/player.service';
 })
 export class App implements OnInit {
   newPlayerName = '';
-  newPlayerRating = 1500;
+  newPlayerRating = 0;
+  newPlayerRole: PlayerRole = '';
   players$!: Observable<Player[]>;
   isDatePickerVisible: boolean = false;
   selectedMatchDate: string = '';
@@ -28,12 +29,23 @@ export class App implements OnInit {
 
   async addPlayer(): Promise<void> {
     const name = this.newPlayerName.trim();
-    if (!name) return;
+    if (!name || !this.newPlayerRole) return;
+
+    const newPlayer = {
+      name,
+      rating: this.newPlayerRating || 1500,
+      role: this.newPlayerRole,
+      totalGoals: 0,
+      gamesPlayed: 0,
+      mvpAwards: 0,
+      isActive: true
+    };
 
     try {
-      await this.playerService.addPlayer(name, this.newPlayerRating || 1500);
+      await this.playerService.addPlayer(newPlayer);
       this.newPlayerName = '';
       this.newPlayerRating = 1500;
+      this.newPlayerRole = '';
     } catch (error) {
       console.error(error);
     }
