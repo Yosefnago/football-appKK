@@ -1,1 +1,60 @@
-/* You can add global styles to this file, and also import other style files */
+/* ============================================================
+   GLOBAL STYLES — src/styles.css
+   Registered under "styles" in angular.json.
+   Holds CSS variables + reset + body, because component styles
+   (app.css) are view-encapsulated and cannot target :root/body.
+   ============================================================ */
+
+:root {
+  /* Surfaces */
+  --ink: #14271d;
+  --ink-hover: #1f3a2c;
+  --ink-line: rgba(255, 255, 255, 0.09);
+  --paper: #e9e6dd;
+  --surface: #fbfaf6;
+  --surface-sunk: #f2efe6;
+  --line: #dcd6c8;
+
+  /* Brand + actions */
+  --brand: #2d6a4f;
+  --brand-strong: #235640;
+  --accent: #bc6c25;
+  --accent-soft: #f3e3cf;
+  --danger: #b23a3a;
+  --danger-soft: #f4e0de;
+
+  /* Ranking + teams */
+  --gold: #c2962c;
+  --silver: #97928a;
+  --bronze: #aa6a3c;
+  --accepted-blue: #3a5a98;
+  --not-accepted-green: #eb361e;
+
+  /* Text */
+  --text: #1d2a22;
+  --text-soft: #4c5a50;
+  --text-muted: #7c776c;
+  --text-invert: #f4f1e9;
+
+  /* Depth */
+  --shadow-sm: 0 1px 2px rgba(30, 35, 25, 0.06), 0 4px 14px rgba(30, 35, 25, 0.06);
+  --shadow-md: 0 6px 22px rgba(30, 35, 25, 0.12);
+  --radius: 14px;
+  --radius-sm: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: 'Assistant', 'Segoe UI', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--text);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
