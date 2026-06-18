@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   collection, onSnapshot, addDoc, doc,
-  updateDoc, query, where, limit, getDocs
+  updateDoc, query, where, limit, getDocs, getDoc
 } from 'firebase/firestore';
 import { Player } from './player.service';
 import { db } from '../app.config';
@@ -75,6 +75,12 @@ export class MatchService {
     const q = query(this.matchesCollection, where('status', 'in', ['registration', 'draft', 'locked']), limit(1));
     const snapshot = await getDocs(q);
     return snapshot.empty ? null : ({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Match);
+  }
+
+  async getMatchById(matchId: string): Promise<Match | null> {
+    const snap = await getDoc(doc(db, 'matches', matchId));
+    if (!snap.exists()) return null;
+    return { id: snap.id, ...snap.data() } as Match;
   }
 
   getActiveMatchObservable(matchId: string): Observable<Match> {

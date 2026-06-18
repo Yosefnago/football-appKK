@@ -28,6 +28,7 @@ export class RsvpComponent implements OnInit {
 
   matchId        = '';
   currentMatch: Match | null   = null;
+  matchClosed    = false;
   currentPlayer: Player | null = null;
 
   step: RsvpStep = 'loading';
@@ -55,12 +56,15 @@ export class RsvpComponent implements OnInit {
   }
 
   private async init(): Promise<void> {
-    const match = await this.matchSvc.getActiveMatch();
-    if (!match || match.id !== this.matchId) {
+    const match = await this.matchSvc.getMatchById(this.matchId);
+
+    if (!match || match.status !== 'registration') {
+      this.matchClosed = true;
       this.step = 'done';
       this.cdr.markForCheck();
       return;
     }
+
     this.currentMatch = match;
 
     const user = this.fireAuth.currentUser;

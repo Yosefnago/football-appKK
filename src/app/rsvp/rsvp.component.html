@@ -9,7 +9,7 @@
           <path d="M12 7.5V4M15.2 9.8l3-1M13.9 13.5l1.9 3M10.1 13.5l-1.9 3M8.8 9.8l-3-1"></path>
         </svg>
       </div>
-      <h1 class="rsvp-title">מנהל קבוצה</h1>
+      <h1 class="rsvp-title">פרטי המשחק</h1>
       @if (currentMatch?.date) {
         <div class="rsvp-match-info">
           <span class="rsvp-match-label">מועד המשחק</span>
@@ -141,13 +141,21 @@
     }
 
     @if (step === 'done') {
-      <div class="rsvp-done">
-        <div class="done-icon" [class.done-no]="attendance === false">
-          {{ attendance === false ? '✕' : '✓' }}
+      @if (matchClosed) {
+        <div class="rsvp-done">
+          <div class="done-icon done-no">🔒</div>
+          <h3>ההרשמה נסגרה</h3>
+          <p>המארגן נעל את ההרכבים.<br>לא ניתן לאשר הגעה יותר.</p>
         </div>
-        <h3>{{ attendance === false ? 'נרשמת כלא מגיע' : 'האישור נקלט!' }}</h3>
-        <p>תודה, ניתן לסגור את החלון.</p>
-      </div>
+      } @else {
+        <div class="rsvp-done">
+          <div class="done-icon" [class.done-no]="attendance === false">
+            {{ attendance === false ? '✕' : '✓' }}
+          </div>
+          <h3>{{ attendance === false ? 'נרשמת כלא מגיע' : 'האישור נקלט!' }}</h3>
+          <p>תודה, ניתן לסגור את החלון.</p>
+        </div>
+      }
     }
 
   </div>
