@@ -35,3 +35,6 @@ __screenshots__/
 Thumbs.db
 
 src/environments/environment.ts
+
+.firebase/
+.firebaserc
