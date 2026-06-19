@@ -1,7 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import {
   getAuth, GoogleAuthProvider, signInWithPopup,
-  signOut, onAuthStateChanged, User
+  signOut, onAuthStateChanged, setPersistence,
+  browserLocalPersistence, User
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { app, db } from '../app.config';
@@ -24,6 +25,8 @@ export class AuthService {
   readonly appUser     = signal<AppUser | null | undefined>(undefined);
 
   constructor() {
+    setPersistence(this.auth, browserLocalPersistence).catch(() => {});
+
     onAuthStateChanged(this.auth, async user => {
       this.currentUser.set(user);
       if (user) {
@@ -61,6 +64,23 @@ export class AuthService {
   async logout(): Promise<void> {
     await signOut(this.auth);
     window.location.href = '/login';
+  }
+
+  waitUntilReady(): Promise<void> {
+    return new Promise(resolve => {
+      const check = () => {
+        if (this.currentUser() === undefined) {
+          setTimeout(check, 30);
+          return;
+        }
+        if (this.currentUser() && this.appUser() === undefined) {
+          setTimeout(check, 30);
+          return;
+        }
+        resolve();
+      };
+      check();
+    });
   }
 
   get isResolved():    boolean { return this.currentUser() !== undefined; }

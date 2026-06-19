@@ -20,9 +20,11 @@ export class LoginComponent {
     this.loading = true;
     this.error   = '';
     this.cdr.detectChanges();
+
     try {
       await this.auth.loginWithGoogle();
-      this.router.navigate(['/app']);
+      await this.auth.waitUntilReady();
+      this.router.navigateByUrl('/app');
     } catch (e: any) {
       if (e?.code !== 'auth/popup-closed-by-user') {
         this.error = 'ההתחברות נכשלה. נסה שוב.';
