@@ -1,13 +1,14 @@
 import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { PlayerService, Player, PlayerRole } from '../services/player.service';
 import { MatchService, Match } from '../services/match.service';
+
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { app, db } from '../app.config';
+import { app } from '../app.config';
+import { OnboardingService } from '../services/Onboarding.service';
 
 type RsvpStep = 'loading' | 'login' | 'register' | 'rsvp' | 'confirm' | 'done';
 
@@ -20,11 +21,13 @@ type RsvpStep = 'loading' | 'login' | 'register' | 'rsvp' | 'confirm' | 'done';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RsvpComponent implements OnInit {
-  private route     = inject(ActivatedRoute);
-  private playerSvc = inject(PlayerService);
-  private matchSvc  = inject(MatchService);
-  private cdr       = inject(ChangeDetectorRef);
-  private fireAuth  = getAuth(app);
+  private route        = inject(ActivatedRoute);
+  private router       = inject(Router);
+  private playerSvc    = inject(PlayerService);
+  private matchSvc     = inject(MatchService);
+  private onboardingSvc = inject(OnboardingService);
+  private cdr          = inject(ChangeDetectorRef);
+  private fireAuth      = getAuth(app);
 
   matchId        = '';
   currentMatch: Match | null   = null;
@@ -56,56 +59,69 @@ export class RsvpComponent implements OnInit {
   }
 
   private async init(): Promise<void> {
-    const match = await this.matchSvc.getMatchById(this.matchId);
+    try {
+      const match = await this.matchSvc.getMatchById(this.matchId);
 
-    if (!match || match.status !== 'registration') {
-      this.matchClosed = true;
-      this.step = 'done';
-      this.cdr.markForCheck();
-      return;
-    }
-
-    this.currentMatch = match;
-
-    const user = this.fireAuth.currentUser;
-    if (!user) {
-      this.step = 'login';
-      this.cdr.markForCheck();
-      return;
-    }
-
-    await this.loadPlayerForUser(user.uid);
-  }
-
-  private async loadPlayerForUser(uid: string): Promise<void> {
-    const player = await this.playerSvc.getPlayerByUid(uid);
-
-    if (!player) {
-      const regSnap = await getDoc(doc(db, 'registrations', uid));
-      if (regSnap.exists()) {
-        this.alreadyExists = true;
-        this.step = 'register';
+      if (!match || match.status !== 'registration') {
+        this.matchClosed = true;
+        this.step = 'done';
         this.cdr.markForCheck();
         return;
       }
 
-      const user   = this.fireAuth.currentUser;
-      this.newName = user?.displayName || '';
-      this.newRole = '';
-      this.step    = 'register';
-    } else {
-      this.currentPlayer = player;
-      const existing     = this.currentMatch?.rsvps?.[player.id];
+      this.currentMatch = match;
+
+      const user = this.fireAuth.currentUser;
+      if (!user) {
+        this.step = 'login';
+        this.cdr.markForCheck();
+        return;
+      }
+
+      await this.loadPlayerForUser(user.uid);
+    } catch (e) {
+      console.error('rsvp init failed', e);
+      this.loginError = 'שגיאה בטעינת המשחק. נסה לרענן את הדף.';
+      this.step = 'login';
+      this.cdr.markForCheck();
+    }
+  }
+
+  private async loadPlayerForUser(uid: string): Promise<void> {
+    try {
+      const result = await this.onboardingSvc.checkStatus(uid);
+
+      if (!result.player) {
+        if (result.alreadyRegistered) {
+          this.alreadyExists = true;
+        }
+        const user   = this.fireAuth.currentUser;
+        this.newName = user?.displayName || '';
+        this.newRole = '';
+        this.step    = 'register';
+        this.cdr.markForCheck();
+        return;
+      }
+
+      this.currentPlayer = result.player;
+      const existing      = this.currentMatch?.rsvps?.[result.player.id];
+
       if (existing) {
         this.attendance   = existing.status === 'accepted';
-        this.selectedRole = (existing.preferredRole as PlayerRole) || player.role || '';
+        this.selectedRole = (existing.preferredRole as PlayerRole) || result.player.role || '';
       } else {
         this.attendance   = null;
-        this.selectedRole = player.role || '';
+        this.selectedRole = result.player.role || '';
       }
+
       this.step = 'rsvp';
+      this.cdr.markForCheck();
+    } catch (e) {
+      console.error('loadPlayerForUser failed', e);
+      this.loginError = 'שגיאה בטעינת הנתונים. נסה לרענן את הדף.';
+      this.step = 'login';
+      this.cdr.markForCheck();
     }
-    this.cdr.markForCheck();
   }
 
   async loginWithGoogle(): Promise<void> {
@@ -134,20 +150,12 @@ export class RsvpComponent implements OnInit {
     this.loading = true;
     this.cdr.markForCheck();
 
-    await this.playerSvc.createPlayerWithUid(user.uid, {
-      name:        this.newName.trim(),
-      role:        this.newRole,
-      rating:      70,
-      totalGoals:  0,
-      gamesPlayed: 0,
-      mvpAwards:   0,
-      isActive:    true
-    });
-
-    await setDoc(doc(db, 'registrations', user.uid), {
-      registeredAt: new Date().toISOString(),
-      email: user.email || ''
-    });
+    await this.onboardingSvc.completeRegistration(
+      user.uid,
+      user.email || '',
+      this.newName.trim(),
+      this.newRole
+    );
 
     this.loading = false;
     await this.loadPlayerForUser(user.uid);
@@ -185,6 +193,10 @@ export class RsvpComponent implements OnInit {
 
     this.step = 'done';
     this.cdr.markForCheck();
+  }
+
+  goHome(): void {
+    this.router.navigate(['/app']);
   }
 
   formatDate(iso: string): string {

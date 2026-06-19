@@ -3,19 +3,29 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Router } from '@angular/router';
 
 import { PlayerService, Player, PlayerRole, PlayerEndMatchUpdate } from './services/player.service';
 import { MatchService, Match, TeamResult, PlayerMatchStat } from './services/match.service';
 import { TeamGeneratorService } from './services/TeamGeneratorService';
 import { TeamsComponent } from './teams/teams.component';
 import { AuthService } from './services/Auth.service';
+import { getAuth } from 'firebase/auth';
+import { app } from './app.config';
 
 export interface FinishPlayerRow {
   id: string;
   name: string;
   currentRating: number;
   teamIndex: number;
+}
+
+export interface TeamLineupStat {
+  matchId: string;
+  matchDate: string;
+  teamKey: string;
+  teamIndex: number;
+  goals: number;
+  players: Player[];
 }
 
 @Component({
@@ -29,18 +39,35 @@ export class App implements OnInit {
   readonly Math = Math;
 
   readonly authService = inject(AuthService);
+  private fireAuth = getAuth(app);
+
+  myPlayerId: string | null = null;
+  myRsvpStatus: 'accepted' | 'declined' | null = null;
+  myRsvpRole: string | null = null;
+
+  showOwnRoleSelector = false;
+  ownAttendance: boolean | null = null;
+  ownSelectedRole: PlayerRole = '';
+
+  roleOptions = [
+    { value: 'GK',  label: 'שוער',  icon: '🧤' },
+    { value: 'DEF', label: 'הגנה',  icon: '🛡️' },
+    { value: 'MID', label: 'קישור', icon: '⚙️' },
+    { value: 'FWD', label: 'התקפה', icon: '⚽' },
+  ];
+
+  statsTab: 'scorers' | 'lineups' | 'elite' = 'scorers';
+  statsScorers$!: Observable<Player[]>;
+  statsElite$!:   Observable<Player[]>;
+  topLineups: TeamLineupStat[] = [];
+  expandedLineupKey: string | null = null;
 
   private playerService        = inject(PlayerService);
   private matchService         = inject(MatchService);
   private teamGeneratorService = inject(TeamGeneratorService);
   private cdr                  = inject(ChangeDetectorRef);
-  private router               = inject(Router);
 
   activeMatch: Match | null = null;
-
-  newPlayerName   = '';
-  newPlayerRating = 0;
-  newPlayerRole: PlayerRole = '';
 
   isDatePickerVisible   = false;
   selectedMatchDate     = '';
@@ -80,6 +107,8 @@ export class App implements OnInit {
     this.matches$          = this.matchService.getMatches();
     this.completedMatches$ = this.matchService.getCompletedMatches();
     this.initDashboardStats();
+    this.initFullStats();
+    this.loadTopLineups();
 
     const m = await this.matchService.getActiveMatch();
     if (m) {
@@ -98,6 +127,56 @@ export class App implements OnInit {
       }
       this.cdr.detectChanges();
     }
+  }
+
+  private initFullStats(): void {
+    this.statsScorers$ = this.players$.pipe(
+      map(ps => [...ps].filter(p => (p.totalGoals || 0) > 0).sort((a, b) => (b.totalGoals||0) - (a.totalGoals||0)))
+    );
+    this.statsElite$ = this.players$.pipe(
+      map(ps => [...ps].sort((a, b) => b.rating - a.rating))
+    );
+  }
+
+  private loadTopLineups(): void {
+    this.matchService.getCompletedMatches().subscribe(matches => {
+      const lineups: TeamLineupStat[] = [];
+
+      matches.forEach(match => {
+        if (!match.teams || !match.teamResults) return;
+
+        Object.keys(match.teams).sort().forEach(teamKey => {
+          const goals = match.teamResults?.[teamKey]?.goals ?? 0;
+          const teamIndex = parseInt(teamKey.replace('group', ''), 10) - 1;
+
+          lineups.push({
+            matchId: match.id,
+            matchDate: match.date,
+            teamKey,
+            teamIndex,
+            goals,
+            players: match.teams![teamKey] || []
+          });
+        });
+      });
+
+      lineups.sort((a, b) => b.goals - a.goals);
+      this.topLineups = lineups.slice(0, 10);
+      this.cdr.detectChanges();
+    });
+  }
+
+  toggleLineup(key: string): void {
+    this.expandedLineupKey = this.expandedLineupKey === key ? null : key;
+  }
+
+  lineupKey(lineup: TeamLineupStat): string {
+    return `${lineup.matchId}-${lineup.teamKey}`;
+  }
+
+  formatStatsDate(iso: string): string {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('he-IL');
   }
 
   private initDashboardStats(): void {
@@ -126,6 +205,17 @@ export class App implements OnInit {
     this.declinedPlayers$ = combineLatest([this.players$, match$]).pipe(
       map(([ps, m]) => ps.filter(p => m.rsvps?.[p.id]?.status === 'declined'))
     );
+
+    const uid = this.fireAuth.currentUser?.uid;
+    if (uid) {
+      this.myPlayerId = uid;
+      match$.subscribe(m => {
+        const rsvp = m.rsvps?.[uid];
+        this.myRsvpStatus = rsvp ? rsvp.status : null;
+        this.myRsvpRole   = rsvp?.preferredRole || null;
+        this.cdr.detectChanges();
+      });
+    }
   }
 
   async confirmMatchCreation(): Promise<void> {
@@ -165,10 +255,12 @@ export class App implements OnInit {
         this.pendingAcceptedPlayers, this.pendingAcceptedPlayers.length, n
       );
       await this.matchService.saveTeamsDraft(this.activeMatch.id, teams);
+
       this.generatedTeams        = teams;
       this.teamRosterOpen        = teams.map(() => false);
       this.isMatchCreationActive = false;
-      this.activeMatch           = await this.matchService.getActiveMatch();
+
+      this.activeMatch = { ...this.activeMatch, status: 'draft', teams: undefined };
       this.cdr.detectChanges();
     } catch (e) { console.error(e); }
   }
@@ -303,17 +395,30 @@ export class App implements OnInit {
     return role ? (map[role] ?? role) : '';
   }
 
-  async addPlayer(): Promise<void> {
-    const name = this.newPlayerName.trim();
-    if (!name || !this.newPlayerRole) return;
-    try {
-      await this.playerService.addPlayer({
-        name, rating: this.newPlayerRating || 60, role: this.newPlayerRole,
-        totalGoals: 0, gamesPlayed: 0, mvpAwards: 0, isActive: true
-      } as Player);
-      this.newPlayerName = ''; this.newPlayerRating = 0; this.newPlayerRole = '';
-      this.cdr.detectChanges();
-    } catch (e) { console.error(e); }
+  openOwnRoleSelector(): void {
+    this.ownAttendance   = this.myRsvpStatus === 'accepted' ? true : (this.myRsvpStatus === 'declined' ? false : null);
+    this.ownSelectedRole = (this.myRsvpRole as PlayerRole) || '';
+    this.showOwnRoleSelector = true;
+  }
+
+  async submitOwnRsvp(): Promise<void> {
+    if (!this.activeMatch || !this.myPlayerId || this.ownAttendance === null) return;
+    if (this.ownAttendance && !this.ownSelectedRole) return;
+
+    const status = this.ownAttendance ? 'accepted' : 'declined';
+
+    await this.matchService.updateRsvp(
+      this.activeMatch.id,
+      this.myPlayerId,
+      status,
+      this.ownSelectedRole,
+      this.myPlayerId
+    );
+
+    this.myRsvpStatus = status;
+    this.myRsvpRole   = this.ownSelectedRole || null;
+    this.showOwnRoleSelector = false;
+    this.cdr.detectChanges();
   }
 
   async deletePlayer(id: string): Promise<void> {

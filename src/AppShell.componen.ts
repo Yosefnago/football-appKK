@@ -1,11 +1,12 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { filter } from 'rxjs/operators';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { app, db } from './app/app.config';
-import { PlayerRole, PlayerService } from './app/services/player.service';
+import { OnboardingService } from './app/services/Onboarding.service';
+import { app } from './app/app.config';
+import { PlayerRole } from './app/services/player.service';
 
 
 @Component({
@@ -142,9 +143,12 @@ import { PlayerRole, PlayerService } from './app/services/player.service';
   `]
 })
 export class AppShellComponent implements OnInit {
-  private playerSvc = inject(PlayerService);
-  private cdr       = inject(ChangeDetectorRef);
-  private fireAuth  = getAuth(app);
+  private onboardingSvc = inject(OnboardingService);
+  private cdr           = inject(ChangeDetectorRef);
+  private router        = inject(Router);
+  private fireAuth       = getAuth(app);
+
+  private isRsvpRoute = false;
 
   showOnboarding  = false;
   onboardName     = '';
@@ -159,12 +163,21 @@ export class AppShellComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.isRsvpRoute = this.router.url.includes('/rsvp/');
+
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe((e: any) => {
+      this.isRsvpRoute = e.urlAfterRedirects.includes('/rsvp/');
+    });
+
     onAuthStateChanged(this.fireAuth, async (user) => {
       if (!user) return;
+      if (this.isRsvpRoute) return;
 
       try {
-        const regSnap = await getDoc(doc(db, 'registrations', user.uid));
-        if (regSnap.exists()) return;
+        const result = await this.onboardingSvc.checkStatus(user.uid);
+        if (result.alreadyRegistered) return;
 
         this.onboardName    = user.displayName || '';
         this.showOnboarding = true;
@@ -183,23 +196,12 @@ export class AppShellComponent implements OnInit {
     this.onboardLoading = true;
     this.cdr.detectChanges();
 
-    const existing = await this.playerSvc.getPlayerByUid(user.uid);
-    if (!existing) {
-      await this.playerSvc.createPlayerWithUid(user.uid, {
-        name:        this.onboardName.trim(),
-        role:        this.onboardRole,
-        rating:      70,
-        totalGoals:  0,
-        gamesPlayed: 0,
-        mvpAwards:   0,
-        isActive:    true
-      });
-    }
-
-    await setDoc(doc(db, 'registrations', user.uid), {
-      registeredAt: new Date().toISOString(),
-      email:        user.email || ''
-    });
+    await this.onboardingSvc.completeRegistration(
+      user.uid,
+      user.email || '',
+      this.onboardName.trim(),
+      this.onboardRole
+    );
 
     this.showOnboarding = false;
     this.onboardLoading = false;

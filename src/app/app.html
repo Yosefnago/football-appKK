@@ -1,6 +1,7 @@
 <input type="radio" name="nav" id="r-dashboard"     class="nav-radio" checked>
   <input type="radio" name="nav" id="r-players"       class="nav-radio">
   <input type="radio" name="nav" id="r-history"       class="nav-radio">
+  <input type="radio" name="nav" id="r-stats"         class="nav-radio">
   <input type="radio" name="nav" id="r-active-match"  class="nav-radio">
 
   <div class="app">
@@ -50,6 +51,16 @@
             <path d="M8 8h8M8 12h8M8 16h5"></path>
           </svg>
           <span class="nav-label">היסטוריית משחקים</span>
+        </label>
+
+        <label class="nav-item" for="r-stats">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span class="nav-label">סטטיסטיקות</span>
         </label>
 
         @if (activeMatch?.status === 'locked') {
@@ -175,7 +186,7 @@
                   <div class="locked-banner draft-banner">
                     <div>
                       <h3 class="locked-banner-date">{{ formattedMatchDate }}</h3>
-                      <span class="locked-banner-sub">טיוטת הרכבים — עדיין ניתן לערוך</span>
+                      <span class="locked-banner-sub">טיוטת הרכבים - עדיין ניתן לערוך</span>
                     </div>
                     <span class="status-badge-draft">✏️ טיוטה</span>
                   </div>
@@ -201,15 +212,82 @@
               </div>
 
               @if (isMatchCreationActive) {
-                <div class="card-body">
-                  <div class="form-group" style="margin-top:5px;">
-                    <label>לינק לשליחה לשחקנים:</label>
-                    <div style="display:flex; gap:5px;">
-                      <input type="text" readonly [value]="generatedMatchLink" class="input" #linkInput>
-                      <button class="btn btn-ghost" (click)="copyLink(linkInput)">העתק</button>
+
+                @if (authService.isOrganizer) {
+                  <div class="card-body">
+                    <div class="form-group" style="margin-top:5px;">
+                      <label>לינק לשליחה לשחקנים:</label>
+                      <div style="display:flex; gap:5px;">
+                        <input type="text" readonly [value]="generatedMatchLink" class="input" #linkInput>
+                        <button class="btn btn-ghost" (click)="copyLink(linkInput)">העתק</button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                }
+
+                @if (myPlayerId) {
+                  <div class="card-body" [class.card-body-top-border]="authService.isOrganizer">
+                    <div class="my-rsvp-card" [class.my-rsvp-yes]="myRsvpStatus === 'accepted'" [class.my-rsvp-no]="myRsvpStatus === 'declined'">
+                      @if (myRsvpStatus === 'accepted') {
+                        <div class="my-rsvp-icon my-rsvp-icon-yes">✓</div>
+                        <div class="my-rsvp-text">
+                          <span class="my-rsvp-title">אישרת הגעה</span>
+                          @if (myRsvpRole) {
+                            <span class="my-rsvp-sub">תפקיד: {{ getRsvpRole(myPlayerId) }}</span>
+                          }
+                        </div>
+                      } @else if (myRsvpStatus === 'declined') {
+                        <div class="my-rsvp-icon my-rsvp-icon-no">✕</div>
+                        <div class="my-rsvp-text">
+                          <span class="my-rsvp-title">לא מגיע למשחק</span>
+                        </div>
+                      } @else {
+                        <div class="my-rsvp-icon my-rsvp-icon-pending">?</div>
+                        <div class="my-rsvp-text">
+                          <span class="my-rsvp-title">עדיין לא אישרת הגעה</span>
+                        </div>
+                      }
+
+                      @if (!showOwnRoleSelector) {
+                        <button class="btn btn-ghost my-rsvp-change-btn" (click)="openOwnRoleSelector()">
+                          {{ myRsvpStatus ? 'שנה בחירה' : 'אשר הגעה' }}
+                        </button>
+                      }
+                    </div>
+
+                    @if (showOwnRoleSelector) {
+                      <div class="own-rsvp-inline">
+                        <div class="attendance-btns" style="margin-top:14px;">
+                          <button class="att-btn att-yes" [class.selected]="ownAttendance === true" (click)="ownAttendance = true">
+                            ✓ מגיע
+                          </button>
+                          <button class="att-btn att-no" [class.selected]="ownAttendance === false" (click)="ownAttendance = false; ownSelectedRole = ''">
+                            ✕ לא מגיע
+                          </button>
+                        </div>
+
+                        @if (ownAttendance === true) {
+                          <div class="role-grid" style="margin-top:12px;">
+                            @for (r of roleOptions; track r.value) {
+                              <button class="role-btn" [class.selected]="ownSelectedRole === r.value" (click)="ownSelectedRole = $any(r.value)">
+                                <span class="role-icon">{{ r.icon }}</span>
+                                <span>{{ r.label }}</span>
+                              </button>
+                            }
+                          </div>
+                        }
+
+                        <div class="modal-actions" style="margin-top:14px; justify-content:flex-start;">
+                          <button class="btn btn-ghost" (click)="showOwnRoleSelector = false">ביטול</button>
+                          <button class="btn btn-primary" (click)="submitOwnRsvp()"
+                                  [disabled]="ownAttendance === null || (ownAttendance && !ownSelectedRole)">
+                            שלח אישור
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
 
                 <div class="teams-preview">
                   <div class="teams-grid">
@@ -225,8 +303,12 @@
                             @if (getRsvpRole(player.id)) {
                               <span class="rsvp-role-tag">{{ getRsvpRole(player.id) }}</span>
                             }
-                            <span class="tag">{{ player.rating }}</span>
+                            @if (authService.isOrganizer) {
+                              <span class="tag">{{ player.rating }}</span>
+                            }
                           </li>
+                        } @empty {
+                          <li class="rsvp-empty-row">אין שחקנים עדיין</li>
                         }
                       </ul>
                     </div>
@@ -238,7 +320,14 @@
                       </div>
                       <ul>
                         @for (player of (declinedPlayers$ | async) || []; track player.id) {
-                          <li><span>{{ player.name }}</span><span class="tag">{{ player.rating }}</span></li>
+                          <li class="rsvp-player-row">
+                            <span class="rsvp-name">{{ player.name }}</span>
+                            @if (authService.isOrganizer) {
+                              <span class="tag">{{ player.rating }}</span>
+                            }
+                          </li>
+                        } @empty {
+                          <li class="rsvp-empty-row">אין שחקנים עדיין</li>
                         }
                       </ul>
                     </div>
@@ -260,7 +349,7 @@
                       <circle cx="12" cy="12" r="10"></circle>
                       <path d="M12 8v4m0 4h.01"></path>
                     </svg>
-                    ההרכבים בטיוטה — ניתן לגרור שחקנים בין עמדות. לחץ "נעל סופית" כשמוכן.
+                    ההרכבים בטיוטה - ניתן לגרור שחקנים בין עמדות. לחץ "נעל סופית" כשמוכן.
                   </div>
                   <app-teams
                     [teams]="generatedTeams"
@@ -274,7 +363,7 @@
               @if (activeMatch?.status === 'locked' && generatedTeams.length > 0) {
                 <div class="card-body">
                   <p style="font-size:13px; color:var(--text-muted); margin:0 0 12px;">
-                    ההרכבים נעולים — לניהול המשחק לחץ על "משחק פעיל" בתפריט
+                    ההרכבים נעולים - לניהול המשחק לחץ על "משחק פעיל" בתפריט
                   </p>
                   <app-teams
                     [teams]="generatedTeams"
@@ -303,6 +392,7 @@
                       <div class="board-row"><span class="nm">אין שחקנים עדיין</span></div>
                     }
                   </div>
+                  <label for="r-stats" class="view-full-ranking-link" (click)="statsTab = 'elite'">צפה בדירוג המלא</label>
                 </div>
               </div>
 
@@ -322,6 +412,7 @@
                       <div class="board-row"><span class="nm">אין שחקנים עדיין</span></div>
                     }
                   </div>
+                  <label for="r-stats" class="view-full-ranking-link" (click)="statsTab = 'scorers'">צפה בדירוג המלא</label>
                 </div>
               </div>
             </div>
@@ -335,39 +426,15 @@
           <div class="page-head">
             <div class="eyebrow">סגל</div>
             <h1 class="display">מאגר שחקנים</h1>
-            <p>הוספה, עריכת דירוג וניהול הסגל</p>
+            <p>הסגל נבנה אוטומטית כשחקנים נרשמים בעצמם דרך לינק ההזמנה</p>
           </div>
 
-          <div class="card">
-            <div class="card-head"><h2>הוספת שחקן חדש</h2></div>
-            <div class="card-body">
-              <div class="add-row">
-                <div class="field">
-                  <label>שם מלא</label>
-                  <input class="input" type="text" placeholder="הזן שם שחקן"
-                         [(ngModel)]="newPlayerName" (keydown.enter)="addPlayer()">
-                </div>
-                <div class="field small">
-                  <label>תפקיד עיקרי</label>
-                  <select class="select" [(ngModel)]="newPlayerRole">
-                    <option value="" disabled selected>בחר...</option>
-                    <option value="GK">שוער</option>
-                    <option value="DEF">הגנה</option>
-                    <option value="MID">קישור</option>
-                    <option value="FWD">התקפה</option>
-                  </select>
-                </div>
-                <div class="field small">
-                  <label>דירוג התחלתי</label>
-                  <input class="input" type="number" min="60" max="99"
-                         [(ngModel)]="newPlayerRating">
-                </div>
-                @if (authService.isOrganizer) {
-                  <button class="btn btn-accent" (click)="addPlayer()">הוסף לסגל</button>
-                }
-              </div>
+          @if (authService.isOrganizer) {
+            <div class="info-note">
+              שחקנים מתווספים למאגר באופן עצמאי כשהם מתחברים בפעם הראשונה.
+              ניתן לערוך שם לכל שחקן קיים בכרטיס שלו למטה.
             </div>
-          </div>
+          }
 
           <div class="section-bar">
             <h2 class="display">הסגל הנוכחי</h2>
@@ -520,6 +587,89 @@
               <div class="empty">אין משחקים בארכיון עדיין.</div>
             }
           </div>
+
+        </div>
+      </section>
+
+      <section class="view view-stats">
+        <div class="page">
+          <div class="page-head">
+            <div class="eyebrow">ביצועים</div>
+            <h1 class="display">סטטיסטיקות</h1>
+            <p>דירוגי שערים, הרכבים ושחקני העילית</p>
+          </div>
+
+          <div class="stats-tabs-row">
+            <button class="stats-tab-btn" [class.active]="statsTab === 'scorers'" (click)="statsTab = 'scorers'">
+              ⚽ דירוג מלך שערים
+            </button>
+            <button class="stats-tab-btn" [class.active]="statsTab === 'lineups'" (click)="statsTab = 'lineups'">
+              🏆 דירוג הרכבים
+            </button>
+            <button class="stats-tab-btn" [class.active]="statsTab === 'elite'" (click)="statsTab = 'elite'">
+              ⭐ שחקני העילית
+            </button>
+          </div>
+
+          @if (statsTab === 'scorers') {
+            <div class="stats-list">
+              @for (player of (statsScorers$ | async) || []; track player.id; let i = $index) {
+                <div class="stats-row">
+                  <span class="stats-rank stats-rank-{{ i < 3 ? i+1 : 'x' }}">{{ i + 1 }}</span>
+                  <span class="stats-name">{{ player.name }}</span>
+                  <span class="stats-role-tag">{{ player.role }}</span>
+                  <span class="stats-value">⚽ {{ player.totalGoals }}</span>
+                </div>
+              } @empty {
+                <div class="stats-empty">אין שערים רשומים עדיין</div>
+              }
+            </div>
+          }
+
+          @if (statsTab === 'elite') {
+            <div class="stats-list">
+              @for (player of (statsElite$ | async) || []; track player.id; let i = $index) {
+                <div class="stats-row">
+                  <span class="stats-rank stats-rank-{{ i < 3 ? i+1 : 'x' }}">{{ i + 1 }}</span>
+                  <span class="stats-name">{{ player.name }}</span>
+                  <span class="stats-role-tag">{{ player.role }}</span>
+                  <span class="stats-value">{{ player.rating }}</span>
+                </div>
+              } @empty {
+                <div class="stats-empty">אין שחקנים רשומים עדיין</div>
+              }
+            </div>
+          }
+
+          @if (statsTab === 'lineups') {
+            <div class="stats-list">
+              @for (lineup of topLineups; track lineupKey(lineup); let i = $index) {
+                <div class="lineup-card">
+                  <button class="lineup-header" (click)="toggleLineup(lineupKey(lineup))">
+                    <span class="stats-rank stats-rank-{{ i < 3 ? i+1 : 'x' }}">{{ i + 1 }}</span>
+                    <span class="lineup-team-name">קבוצה {{ lineup.teamIndex + 1 }}</span>
+                    <span class="lineup-date">{{ formatStatsDate(lineup.matchDate) }}</span>
+                    <span class="stats-value">⚽ {{ lineup.goals }}</span>
+                    <span class="lineup-chevron" [class.open]="expandedLineupKey === lineupKey(lineup)">›</span>
+                  </button>
+
+                  @if (expandedLineupKey === lineupKey(lineup)) {
+                    <div class="lineup-players">
+                      @for (player of lineup.players; track player.id) {
+                        <div class="lineup-player-row">
+                          <span class="lineup-player-name">{{ player.name }}</span>
+                          <span class="stats-role-tag">{{ player.role }}</span>
+                          <span class="lineup-player-rating">{{ player.rating }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              } @empty {
+                <div class="stats-empty">אין הרכבים רשומים עדיין</div>
+              }
+            </div>
+          }
 
         </div>
       </section>
