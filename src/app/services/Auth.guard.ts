@@ -1,39 +1,22 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter, map, take } from 'rxjs/operators';
 import { AuthService } from './Auth.service';
 
 export const authGuard: CanActivateFn = () => {
-  const auth   = inject(AuthService);
+  const auth = inject(AuthService);
   const router = inject(Router);
 
-  return new Promise(resolve => {
-    const waitForAuth = () => {
-      const user = auth.currentUser();
-
-      if (user === undefined) {
-        setTimeout(waitForAuth, 50);
-        return;
+  return toObservable(auth.appUser).pipe(
+    filter(user => user !== undefined),
+    take(1),
+    map(user => {
+      if (user) {
+        return true;
       }
-
-      if (!user) {
-        resolve(router.createUrlTree(['/login']));
-        return;
-      }
-
-      const waitForRole = () => {
-        const appUser = auth.appUser();
-
-        if (appUser === undefined) {
-          setTimeout(waitForRole, 50);
-          return;
-        }
-
-        resolve(true);
-      };
-
-      waitForRole();
-    };
-
-    waitForAuth();
-  });
+      
+      return router.createUrlTree(['/login']);
+    })
+  );
 };
