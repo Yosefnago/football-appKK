@@ -16,6 +16,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "index": "src/index.html",
             "outputPath": "dist/football-app",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
@@ -46,7 +47,8 @@
               "outputHashing": "all",
               "optimization": true,
               "extractLicenses": true,
-              "sourceMap": false
+              "sourceMap": false,
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,

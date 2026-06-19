@@ -1,9 +1,11 @@
 {
-  "name": "football-app",
-  "short_name": "football-app",
+  "name": "Assad League",
+  "short_name": "TacticalArena",
+  "theme_color": "#0f172a",
+  "background_color": "#ffffff",
   "display": "standalone",
-  "scope": "./",
-  "start_url": "./",
+  "scope": "/",
+  "start_url": "/",
   "icons": [
     {
       "src": "icons/icon-72x72.png",
